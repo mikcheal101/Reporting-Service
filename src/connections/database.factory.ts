@@ -3,7 +3,7 @@ import { DatabaseType } from './databasetype.enum';
 import { ConnectionRequestDto } from './dto/connection.request.dto';
 
 export class DatabaseFactory {
-  static create(connectionRequestDto: ConnectionRequestDto): any {
+  static create = (connectionRequestDto: ConnectionRequestDto): any => {
     switch (connectionRequestDto.databaseType) {
       case DatabaseType.MSSQL:
         return new MssqlAdapter(connectionRequestDto);
@@ -14,7 +14,7 @@ export class DatabaseFactory {
     }
   }
 
-  static getSchemaQueryForDatabase(databaseType: DatabaseType): string {
+  static getSchemaQueryForDatabase = (databaseType: DatabaseType): string => {
     switch (databaseType) {
       case DatabaseType.MSSQL:
         return `SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS;`;
@@ -23,11 +23,11 @@ export class DatabaseFactory {
     }
   }
 
-  static wrapQueryWithLimit(
+  static wrapQueryWithLimit = (
     databaseType: DatabaseType,
     query: string,
     limit: number,
-  ): string {
+  ): string => {
     query = query.trim().replace(/;$/, '');
     switch (databaseType) {
       case DatabaseType.MSSQL:

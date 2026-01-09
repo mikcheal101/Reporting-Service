@@ -31,9 +31,9 @@ export class ReportsController {
   @Post()
   public async saveReport(
     @Body() createReportRequestDto: CreateReportRequestDto,
-  ): Promise<ReportDto | undefined> {
+  ): Promise<ReportDto> {
     try {
-      return await this.reportsService.createReport(createReportRequestDto);
+      return await this.reportsService.createReportAsync(createReportRequestDto);
     } catch (error) {
       throw new BadGatewayException(error.message);
     }
@@ -43,7 +43,7 @@ export class ReportsController {
   @Get()
   public async getReports(): Promise<ReportDto[]> {
     try {
-      return await this.reportsService.fetchAll();
+      return await this.reportsService.fetchAllAsync();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -55,7 +55,7 @@ export class ReportsController {
     @Body() queryRequestDto: QueryRequestDto,
   ): Promise<string | undefined> {
     try {
-      return await this.reportsService.testQuery(queryRequestDto);
+      return await this.reportsService.testQueryAsync(queryRequestDto);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new BadRequestException(error.message);
@@ -68,7 +68,7 @@ export class ReportsController {
     @Body() queryRequestDto: QueryRequestDto,
   ): Promise<boolean> {
     try {
-      return await this.reportsService.saveQuery(queryRequestDto);
+      return await this.reportsService.saveQueryAsync(queryRequestDto);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -80,7 +80,7 @@ export class ReportsController {
     @Body() aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
   ): Promise<string | undefined> {
     try {
-      return await this.reportsService.generateQueryViaAI(
+      return await this.reportsService.generateQueryViaAIAsync(
         aiQueryGenerationRequestDto,
       );
     } catch (error) {
@@ -92,7 +92,7 @@ export class ReportsController {
   @Get('report-parameters/:id')
   public async getReportParameters(@Param('id') id: string): Promise<any> {
     try {
-      return this.reportsService.getReportParameters(Number.parseInt(id));
+      return this.reportsService.getReportParametersAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -102,7 +102,7 @@ export class ReportsController {
   @Get(':id')
   public async getReport(@Param('id') id: string): Promise<ReportDto> {
     try {
-      return await this.reportsService.findOne(Number.parseInt(id));
+      return await this.reportsService.findOneAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -113,9 +113,9 @@ export class ReportsController {
   public async updateReport(
     @Param('id') id: string,
     @Body() updateReportRequestDto: UpdateReportRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportDto> {
     try {
-      return await this.reportsService.update(
+      return await this.reportsService.updateAsync(
         Number.parseInt(id),
         updateReportRequestDto,
       );
@@ -128,7 +128,7 @@ export class ReportsController {
   @Delete(':id')
   public async deleteReport(@Param('id') id: string): Promise<boolean> {
     try {
-      return await this.reportsService.delete(Number.parseInt(id));
+      return await this.reportsService.deleteAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }

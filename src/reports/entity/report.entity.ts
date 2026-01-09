@@ -2,12 +2,14 @@ import { Connection } from 'src/connections/entity/connections.entity';
 import { ReportType } from 'src/report-types/entity/report-types.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ReportDetail } from './report-detail.entity';
 import { QueryParameter } from './query-parameter.entity';
@@ -44,9 +46,9 @@ export class Report {
   @OneToOne(() => Task, (task) => task.report, { cascade: true })
   task: Task;
 
-  @Column({ default: () => 'GETDATE()' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ onUpdate: 'GETDATE()', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

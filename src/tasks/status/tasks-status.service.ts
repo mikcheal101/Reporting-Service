@@ -11,11 +11,11 @@ export class TasksStatusService {
     private readonly taskRepository: Repository<Task>,
   ) {}
 
-  public async updateStatus(
+  public updateStatusAsync = async (
     id: number,
     to: TaskStatus,
     from: TaskStatus[],
-  ): Promise<void> {
+  ): Promise<void> => {
     await this.taskRepository.update(
       {
         id: id,

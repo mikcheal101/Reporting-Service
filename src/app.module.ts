@@ -13,6 +13,10 @@ import { ReportTypesModule } from './report-types/report-types.module';
 import { ReportsModule } from './reports/reports.module';
 import { TasksModule } from './tasks/tasks.module';
 import { MailModule } from './mail/mail.module';
+import { RolesController } from './roles/roles.controller';
+import { RolesModule } from './roles/roles.module';
+import { PermissionsController } from './permissions/permissions.controller';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -49,8 +53,10 @@ import { MailModule } from './mail/mail.module';
     ReportsModule,
     TasksModule,
     MailModule,
+    RolesModule,
+    PermissionsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, RolesController, PermissionsController],
   providers: [AppService],
 })
 export class AppModule {}

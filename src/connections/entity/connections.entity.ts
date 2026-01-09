@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { DatabaseType } from '../databasetype.enum';
 import { Report } from 'src/reports/entity/report.entity';
 
@@ -34,9 +34,9 @@ export class Connection {
   @OneToMany(() => Report, (report) => report.connection)
   reports: Report[];
 
-  @Column({ default: () => 'GETDATE()' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ onUpdate: 'GETDATE()', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

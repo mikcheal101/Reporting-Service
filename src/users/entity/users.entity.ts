@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Role } from './roles.entity';
 import { Permission } from './permissions.entity';
@@ -37,17 +39,17 @@ export class User {
   @Column({ nullable: true })
   lastLogin: Date;
 
-  @Column({ default: () => 'GETDATE()' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ nullable: true, onUpdate: 'GETDATE()' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, role => role.users)
   @JoinTable()
   roles: Role[];
 
-  @ManyToMany(() => Permission)
+  @ManyToMany(() => Permission, permission => permission.users)
   @JoinTable()
   permissions: Permission[];
 }

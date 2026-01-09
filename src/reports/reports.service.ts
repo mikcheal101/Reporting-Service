@@ -29,9 +29,9 @@ export class ReportsService {
     this.logger = new Logger(ReportsService.name);
   }
 
-  public async createReport(
+  public createReportAsync = async (
     createReportRequestDto: CreateReportRequestDto,
-  ): Promise<ReportDto | undefined> {
+  ): Promise<ReportDto> => {
     try {
       // check if report exists
       const exists = await this.reportRepository.findOneBy({
@@ -50,15 +50,15 @@ export class ReportsService {
         reportType,
       });
 
-      await this.reportRepository.save(report);
-      return this.reportUtils.convertToDto(report);
+      const createdReport = await this.reportRepository.save(report);
+      return this.reportUtils.convertToDto(createdReport);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async fetchAll(): Promise<ReportDto[]> {
+  public fetchAllAsync = async (): Promise<ReportDto[]> => {
     try {
       const reports = await this.reportRepository.find();
       const reportDtos: ReportDto[] = [];
@@ -72,7 +72,7 @@ export class ReportsService {
     }
   }
 
-  public async findOne(id: number): Promise<ReportDto> {
+  public findOneAsync = async (id: number): Promise<ReportDto> => {
     try {
       const report = await this.reportRepository.findOne({
         where: { id },
@@ -89,7 +89,7 @@ export class ReportsService {
     }
   }
 
-  public async delete(id: number): Promise<boolean> {
+  public deleteAsync = async (id: number): Promise<boolean> => {
     try {
       await this.reportRepository.delete(id);
       return true;
@@ -99,16 +99,15 @@ export class ReportsService {
     }
   }
 
-  public async update(
+  public updateAsync = async (
     id: number,
     updateReportRequestDto: UpdateReportRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportDto> => {
     try {
-      console.log(updateReportRequestDto);
-
+  
       // get the report to update
       const previous = await this.reportRepository.findOneBy({ id });
-      if (!previous) return false;
+      if (!previous) throw new Error('Invalid Report ID!');
 
       if (updateReportRequestDto.name !== undefined) {
         previous.name = updateReportRequestDto.name;
@@ -132,15 +131,15 @@ export class ReportsService {
         previous.queryString = updateReportRequestDto.queryString;
       }
 
-      await this.reportRepository.save(previous);
-      return true;
+      const updatedReport = await this.reportRepository.save(previous);
+      return this.reportUtils.convertToDto(updatedReport);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async getReportParameters(id: number): Promise<QueryParameter[]> {
+  public getReportParametersAsync = async (id: number): Promise<QueryParameter[]> => {
     try {
       // get the parameters by Report
       return await this.queryParameterRepository.findBy({
@@ -152,9 +151,9 @@ export class ReportsService {
     }
   }
 
-  public async testQuery(
+  public testQueryAsync = async (
     queryRequestDto: QueryRequestDto,
-  ): Promise<string | undefined> {
+  ): Promise<string | undefined> => {
     // get the report
     const report = await this.reportRepository.findOne({
       where: { id: Number.parseInt(queryRequestDto.reportId) },
@@ -169,7 +168,7 @@ export class ReportsService {
       name: report.connection.name,
       database: report.connection.database,
       databaseType: report.connection.databaseType,
-      port: `${report.connection.port}`,
+      port: report.connection.port,
       server: report.connection.server,
       user: report.connection.user,
       password: this.cryptoService.decrypt(report.connection.password),
@@ -186,9 +185,9 @@ export class ReportsService {
     );
 
     try {
-      await adapter.connect();
+      await adapter.connectAsync();
       const response = await adapter.query(limitedQueryString, parameters);
-      return response;
+      return JSON.stringify(response);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
@@ -197,7 +196,7 @@ export class ReportsService {
     }
   }
 
-  public async saveQuery(queryRequestDto: QueryRequestDto): Promise<boolean> {
+  public saveQueryAsync = async (queryRequestDto: QueryRequestDto): Promise<boolean> => {
     try {
       // get the report
       const report = await this.reportRepository.findOneBy({
@@ -233,12 +232,12 @@ export class ReportsService {
     }
   }
 
-  public async generateQueryViaAI(
+  public generateQueryViaAIAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
-  ): Promise<string> {
+  ): Promise<string> => {
     try {
       // get the query
-      const aiPrompt = await this.generateAiPrompt(aiQueryGenerationRequestDto);
+      const aiPrompt = await this.generateAiPromptAsync(aiQueryGenerationRequestDto);
 
       // send the prompt to the server
       const ollamaResponse = await fetch(process.env.OLLAMA_API || '', {
@@ -271,13 +270,13 @@ export class ReportsService {
     }
   }
 
-  private async generateAiPrompt(
+  private generateAiPromptAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
-  ): Promise<string> {
+  ): Promise<string> => {
     try {
       // fetch the report to get the databasetype
       const report = await this.reportRepository.findOne({
-        where: { id: Number.parseInt(aiQueryGenerationRequestDto.reportId) },
+        where: { id: aiQueryGenerationRequestDto.reportId },
         relations: {
           connection: true,
         },

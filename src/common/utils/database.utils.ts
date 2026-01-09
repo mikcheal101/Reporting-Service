@@ -1,8 +1,10 @@
 import { QueryParameterDto } from 'src/reports/dto/query-parameter.dto';
 import { DatabaseDatatype } from '../models/database.datatypes.enum';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class DatabaseUtils {
-  public mapDbParameters(params: QueryParameterDto[]) {
+  public mapDbParameters = (params: QueryParameterDto[]) => {
     return params.reduce(
       (acc, p) => {
         const name = p.name.replace(/^@/, '');

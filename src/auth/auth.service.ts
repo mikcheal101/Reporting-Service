@@ -1,22 +1,27 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { SignInResponseDto } from './dto/signin.response.dto';
 import { SignInRequestDto } from './dto/signin.request.dto';
 import { SignUpRequestDto } from './dto/signup.request.dto';
-import { SignUpResponseDto } from './dto/signup.response.dto';
+import { UserResponseDto } from 'src/users/dto/user-response.dto';
+import { UserUtils } from 'src/common/utils/user.utils';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly userUtils: UserUtils,
+  ) {
+    this.logger = new Logger(AuthService.name);
+  }
 
-  async signIn(signInDto: SignInRequestDto): Promise<SignInResponseDto> {
+  public signIn = async (signInDto: SignInRequestDto): Promise<string> => {
     try {
-      const user = await this.usersService.findOne(signInDto.email);
+      const user = await this.usersService.findOneAsync(signInDto.email);
       if (!user) {
         throw new UnauthorizedException();
       }
@@ -29,37 +34,31 @@ export class AuthService {
         throw new UnauthorizedException();
       }
 
-      const payload = {
-        sub: user.id,
-        given_name: user.firstName + ' ' + user.middleName,
-        family_name: user.lastName,
-        email: user.username,
-        phoneNumber: user.phoneNumber,
-        role: 'User',
-      };
+      const payload = this.userUtils.mapUserToUserResponseDto(user);
 
-      const token: string = await this.jwtService.signAsync(payload);
-      return {
-        success: true,
-        message: 'Authentication Successful',
-        errors: [],
-        timestamp: new Date().toISOString(),
-        requestId: '1',
-        data: {
-          token: token,
-          expiration: '3600',
-        },
-      };
+      const token: string = await this.jwtService.signAsync(payload, {
+        expiresIn: '60m',
+      });
+      return token;
     } catch (error) {
-      console.log(error.message);
+      this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  async signUp(signupDto: SignUpRequestDto): Promise<SignUpResponseDto> {
+  public profile = async (id: number): Promise<UserResponseDto> => {
+    try {
+      return await this.usersService.findOneByIdAsync(id);
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      throw new Error(error);
+    }
+  }
+
+  public signUp = async (signupDto: SignUpRequestDto): Promise<UserResponseDto> => {
     // create a user model
     try {
-      const created = await this.usersService.createUser(
+      const created = await this.usersService.createUserAsync(
         signupDto.email,
         signupDto.password,
         signupDto.firstName,
@@ -67,8 +66,9 @@ export class AuthService {
         signupDto.phoneNumber,
         signupDto.middleName,
       );
-      return { isCreated: created };
+      return created;
     } catch (error) {
+      this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }

@@ -25,7 +25,7 @@ export class ConnectionsController {
     @Body() testConnectionDto: TestConnectionRequestDto,
   ) {
     try {
-      return await this.connectionsService.testConnection(testConnectionDto);
+      return await this.connectionsService.testConnectionAsync(testConnectionDto);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -35,7 +35,7 @@ export class ConnectionsController {
   @Get()
   public async getConnections() {
     try {
-      return await this.connectionsService.getAllConnections();
+      return await this.connectionsService.connectionsAsync();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -47,7 +47,7 @@ export class ConnectionsController {
     @Body() createConnectionDto: CreateConnectionRequestDto,
   ) {
     try {
-      return await this.connectionsService.createConnection(
+      return await this.connectionsService.createConnectionAsync(
         createConnectionDto,
       );
     } catch (error) {
@@ -62,7 +62,7 @@ export class ConnectionsController {
     @Body() updateConnectionDto: UpdateConnectionRequestDto,
   ) {
     try {
-      return await this.connectionsService.updateConnection(
+      return await this.connectionsService.updateConnectionAsync(
         id,
         updateConnectionDto,
       );
@@ -75,7 +75,7 @@ export class ConnectionsController {
   @Get(':id')
   public async getConnection(@Param('id') id: string) {
     try {
-      return await this.connectionsService.getDecryptedConnection(
+      return await this.connectionsService.getDecryptedConnectionAsync(
         Number.parseInt(id),
       );
     } catch (error) {
@@ -87,7 +87,7 @@ export class ConnectionsController {
   @Get(':id/tables')
   public async getConnectionTables(@Param('id') id: string) {
     try {
-      return this.connectionsService.getConnectionTables(Number.parseInt(id));
+      return this.connectionsService.getConnectionTablesAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -97,7 +97,7 @@ export class ConnectionsController {
   @Delete(':id')
   public async deleteConnection(@Param('id') id: string) {
     try {
-      return await this.connectionsService.removeConnection(id);
+      return await this.connectionsService.removeConnectionAsync(id);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

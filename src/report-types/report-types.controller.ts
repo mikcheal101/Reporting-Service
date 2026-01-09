@@ -23,7 +23,7 @@ export class ReportTypesController {
   @Get()
   public async getReportTypes(): Promise<ReportTypeDto[]> {
     try {
-      return await this.reportTypeService.fetchAll();
+      return await this.reportTypeService.fetchAllAsync();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -33,7 +33,7 @@ export class ReportTypesController {
   @Get(':id')
   public async getReportType(@Param('id') id: string): Promise<ReportTypeDto> {
     try {
-      return await this.reportTypeService.fetchOne(Number.parseInt(id));
+      return await this.reportTypeService.fetchOneAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -43,7 +43,7 @@ export class ReportTypesController {
   @Post()
   public async createReportType(
     @Body() createReportTypeRequestDto: CreateReportTypeRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportTypeDto> {
     try {
       const emails = createReportTypeRequestDto.emailsToNotify
         .split(',')
@@ -60,7 +60,7 @@ export class ReportTypesController {
         );
       }
 
-      return await this.reportTypeService.create({
+      return await this.reportTypeService.createAsync({
         ...createReportTypeRequestDto,
         datetime: new Date(
           `${createReportTypeRequestDto.runDate}T${createReportTypeRequestDto.runTime}`,
@@ -77,7 +77,7 @@ export class ReportTypesController {
   public async updateReportType(
     @Param('id') id: string,
     @Body() updateReportTypeRequestDto: UpdateReportTypeRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportTypeDto> {
     try {
       const emails = updateReportTypeRequestDto.emailsToNotify
         .split(',')
@@ -99,7 +99,7 @@ export class ReportTypesController {
       );
       updateReportTypeRequestDto.emails = emails;
 
-      return await this.reportTypeService.update(
+      return await this.reportTypeService.updateAsync(
         Number.parseInt(id),
         updateReportTypeRequestDto,
       );
@@ -112,7 +112,7 @@ export class ReportTypesController {
   @Delete(':id')
   public async deleteReportType(@Param('id') id: string): Promise<boolean> {
     try {
-      return await this.reportTypeService.delete(Number.parseInt(id));
+      return await this.reportTypeService.deleteAsync(Number.parseInt(id));
     } catch (error) {
       throw new BadRequestException(error.message);
     }

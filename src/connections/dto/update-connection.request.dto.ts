@@ -1,31 +1,8 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { ConnectionRequestDto } from './connection.request.dto';
 
-export class UpdateConnectionRequestDto {
-  @IsString()
+export class UpdateConnectionRequestDto extends ConnectionRequestDto {
+  @IsBoolean()
   @IsNotEmpty()
-  name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  server: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  port: number;
-
-  @IsString()
-  @IsNotEmpty()
-  user: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
-  @IsString()
-  @IsNotEmpty()
-  database: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  databaseType: number;
+  isTestSuccessful: boolean;
 }

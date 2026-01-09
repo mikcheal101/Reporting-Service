@@ -10,7 +10,7 @@ export class ReportTypeUtils {
     this.logger = new Logger(ReportTypeUtils.name);
   }
 
-  public convertToDto(reportType: ReportType): ReportTypeDto | undefined {
+  public convertToDto = (reportType: ReportType): ReportTypeDto | undefined => {
     if (reportType === undefined) return undefined;
     try {
       const datetime = new Date(reportType.datetime);

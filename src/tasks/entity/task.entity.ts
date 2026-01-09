@@ -1,10 +1,12 @@
 import { Report } from 'src/reports/entity/report.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { TaskStatus } from './task-status.enum';
 
@@ -32,9 +34,9 @@ export class Task {
   @Column({ nullable: true })
   payload: string;
 
-  @Column({ default: () => 'GETDATE()' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ onUpdate: 'GETDATE()', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

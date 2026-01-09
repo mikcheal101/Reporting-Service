@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Frequency } from './frequency.enum';
 import { OutputFormat } from '../../common/exporters/output-format.enum';
 import { Report } from 'src/reports/entity/report.entity';
@@ -26,9 +26,9 @@ export class ReportType {
   @OneToMany(() => Report, (report) => report.reportType, { cascade: true })
   reports: Report[];
 
-  @Column({ default: () => 'GETDATE()' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ onUpdate: 'GETDATE()', nullable: true })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

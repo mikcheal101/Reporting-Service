@@ -40,13 +40,13 @@ export class TasksRunnerService {
     }
   }
 
-  private async exportReport(
+  private exportReportAsync = async (
     task: Task,
     databaseResponse: any,
   ): Promise<{
     buffer: Buffer;
     filename: string;
-  }> {
+  }> => {
     const exporter: IReportExporter = ExporterFactory.create(
       task.report.reportType.outputType,
     );
@@ -62,11 +62,11 @@ export class TasksRunnerService {
     return { buffer, filename };
   }
 
-  private async sendReportEmail(
+  private sendReportEmailAsync = async (
     task: Task,
     filename: string,
     buffer: Buffer,
-  ): Promise<boolean> {
+  ): Promise<boolean> => {
     return await this.mailService.send(
       task.report.reportType.emails
         .split(',')
@@ -76,24 +76,24 @@ export class TasksRunnerService {
     );
   }
 
-  private async updateTaskStatus(
+  private updateTaskStatusAsync = async (
     taskId: number,
     mailSent: boolean,
-  ): Promise<void> {
+  ): Promise<void> => {
     const newStatus: TaskStatus =
       mailSent === true ? TaskStatus.COMPLETED : TaskStatus.FAILED;
-    await this.tasksStatusService.updateStatus(taskId, newStatus, [
+    await this.tasksStatusService.updateStatusAsync(taskId, newStatus, [
       TaskStatus.RUNNING,
     ]);
   }
 
-  public async executeTask(task: Task): Promise<void> {
+  public executeTaskAsync = async (task: Task): Promise<void> => {
     try {
       this.validateTask(task);
 
-      const dbResponse = await this.runReport(task);
+      const dbResponse = await this.runReportAsync(task);
 
-      const { buffer, filename } = await this.exportReport(task, dbResponse);
+      const { buffer, filename } = await this.exportReportAsync(task, dbResponse);
 
       const mediaDirectory: string = join(__dirname, '..', '..', 'media');
       await mkdir(mediaDirectory, { recursive: true });
@@ -101,32 +101,32 @@ export class TasksRunnerService {
       const filePath: string = join(mediaDirectory, filename);
       await writeFile(filePath, buffer);
 
-      const mailSent = await this.sendReportEmail(task, filename, buffer);
+      const mailSent = await this.sendReportEmailAsync(task, filename, buffer);
 
-      await this.updateTaskStatus(task.id, mailSent);
+      await this.updateTaskStatusAsync(task.id, mailSent);
     } catch (error) {
       this.logger.error(error.message);
-      await this.tasksStatusService.updateStatus(task.id, TaskStatus.FAILED, [
+      await this.tasksStatusService.updateStatusAsync(task.id, TaskStatus.FAILED, [
         TaskStatus.QUEUED,
         TaskStatus.RUNNING,
       ]);
     }
   }
 
-  private createAdapter(connection: Connection): IDatabaseAdapter {
+  private createAdapter = (connection: Connection): IDatabaseAdapter => {
     return DatabaseFactory.create({
       name: connection.name,
       database: connection.database,
       databaseType: connection.databaseType,
       password: this.cryptoService.decrypt(connection.password),
-      port: `${connection.port}`,
+      port: connection.port,
       server: connection.server,
       user: connection.user,
     });
   }
 
-  private async runReport(task: Task) {
-    await this.tasksStatusService.updateStatus(task.id, TaskStatus.RUNNING, [
+  private runReportAsync = async (task: Task) => {
+    await this.tasksStatusService.updateStatusAsync(task.id, TaskStatus.RUNNING, [
       TaskStatus.QUEUED,
     ]);
 
@@ -139,8 +139,8 @@ export class TasksRunnerService {
     const parameters = this.databaseUtils.mapDbParameters(
       task.report.parameters,
     );
-    await adapter.connect();
-    const dbResponse = await adapter.query(task.report.queryString, parameters);
+    await adapter.connectAsync();
+    const dbResponse = await adapter.queryAsync(task.report.queryString, parameters);
     return dbResponse;
   }
 }

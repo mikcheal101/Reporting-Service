@@ -14,7 +14,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
     this.logger = new Logger(MssqlAdapter.name);
   }
 
-  public async connect(): Promise<boolean> {
+  public connectAsync = async (): Promise<boolean> => {
     try {
       this.connector = await new mssql.ConnectionPool({
         name: this.connectionDto.name,
@@ -22,7 +22,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
         password: this.connectionDto.password,
         server: this.connectionDto.server,
         database: this.connectionDto.database,
-        port: Number.parseInt(this.connectionDto.port),
+        port: this.connectionDto.port,
         connectionTimeout: 60000, // 60 secs
         options: {
           encrypt: true,
@@ -37,10 +37,10 @@ export class MssqlAdapter implements IDatabaseAdapter {
     }
   }
 
-  public async query(
+  public queryAsync = async (
     sql: string,
     parameters: Record<string, { type: DatabaseDatatype; value: any }> = {},
-  ): Promise<any> {
+  ): Promise<any> => {
     try {
       const request = this.bindParametersToQuery(
         this.connector.request(),
@@ -57,10 +57,10 @@ export class MssqlAdapter implements IDatabaseAdapter {
     }
   }
 
-  private bindParametersToQuery(
+  private bindParametersToQuery = (
     request: mssql.Request,
     parameters: Record<string, { type: DatabaseDatatype; value: any }> = {},
-  ): mssql.Request | undefined {
+  ): mssql.Request | undefined => {
     try {
       // bind the parameters
       Object.entries(parameters).forEach(([name, metadata]) => {
@@ -90,7 +90,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
     }
   }
 
-  public async close(): Promise<boolean> {
+  public closeAsync = async (): Promise<boolean> => {
     try {
       await this.connector.close();
       this.logger.log('successfully closed connection!');

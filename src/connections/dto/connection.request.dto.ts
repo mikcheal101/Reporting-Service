@@ -17,9 +17,9 @@ export abstract class ConnectionRequestDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  port: string;
+  port: number;
 
   @IsString()
   @IsNotEmpty()

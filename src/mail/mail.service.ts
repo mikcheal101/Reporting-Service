@@ -9,14 +9,13 @@ export class MailService {
     this.logger = new Logger(MailService.name);
   }
 
-  public async send(
+  public send = async (
     to: string[],
     subject: string,
     attachment: { filename: string; buffer: Buffer },
     body: string = '',
-  ): Promise<boolean> {
+  ): Promise<boolean> => {
     try {
-      console.log('env: ', process.env);
       this.logger.log('sending message:');
       await this.mailerService.sendMail({
         to,

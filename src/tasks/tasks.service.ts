@@ -20,7 +20,7 @@ export class TasksService {
     private readonly cronUtil: CronUtil,
   ) {}
 
-  private async createTask(report: ReportDto): Promise<Task> {
+  private createTaskAsync = async (report: ReportDto): Promise<Task> => {
     const dateTime: Date = new Date(
       `${report.reportType?.runDate}T${report.reportType?.runTime}`,
     );
@@ -40,12 +40,12 @@ export class TasksService {
     return task;
   }
 
-  public async scheduleTask(
+  public scheduleTaskAsync = async (
     scheduleTaskRequestDto: ScheduleTaskRequestDto,
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       // check if task exists
-      const report = await this.getReport(scheduleTaskRequestDto);
+      const report = await this.getReportAsync(scheduleTaskRequestDto);
 
       const exists = await this.taskRepository.findOneBy({
         report: { id: report.id },
@@ -58,7 +58,7 @@ export class TasksService {
       if (scheduleTaskRequestDto.generateNow) {
         this.logger.log(`scheduling task: ${scheduleTaskRequestDto.reportId}.`);
 
-        const task: Task = await this.createTask(report);
+        const task: Task = await this.createTaskAsync(report);
 
         await this.taskRepository.save(task);
       }
@@ -68,7 +68,7 @@ export class TasksService {
     }
   }
 
-  public async fetchPendingTasks(): Promise<Task[]> {
+  public fetchPendingTasksAsync = async (): Promise<Task[]> => {
     try {
       return await this.taskRepository.find({
         where: {
@@ -87,7 +87,7 @@ export class TasksService {
     }
   }
 
-  public async fetchCompletedTasks(): Promise<Task[]> {
+  public fetchCompletedTasksAsync = async (): Promise<Task[]> => {
     try {
       return await this.taskRepository.find({
         where: {
@@ -106,7 +106,7 @@ export class TasksService {
     }
   }
 
-  public async createDownloadPath(id: number): Promise<string> {
+  public createDownloadPathAsync = async (id: number): Promise<string> => {
     try {
       // fetch task
       const task = await this.taskRepository.findOne({
@@ -143,11 +143,11 @@ export class TasksService {
     }
   }
 
-  private async getReport(
+  private getReportAsync = async (
     scheduleTaskRequestDto: ScheduleTaskRequestDto,
-  ): Promise<ReportDto> {
+  ): Promise<ReportDto> => {
     //get the report.
-    const report: ReportDto = await this.reportService.findOne(
+    const report: ReportDto = await this.reportService.findOneAsync(
       scheduleTaskRequestDto.reportId,
     );
 

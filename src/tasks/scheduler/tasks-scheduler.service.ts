@@ -5,6 +5,7 @@ import { TaskStatus } from '../entity/task-status.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { isValidCron } from 'cron-validator'
 import { TasksStatusService } from '../status/tasks-status.service';
 import { TasksRunnerService } from '../runner/tasks-runner.service';
 import { Frequency } from 'src/report-types/entity/frequency.enum';
@@ -25,10 +26,10 @@ export class TasksSchedulerService {
    * Called automatically when the NestJS application starts.
    * Loads existing tasks and starts the polling process.
    */
-  public async onApplicationBootstrap(): Promise<void> {
+  public onApplicationBootstrapAsync = async (): Promise<void> => {
     try {
       this.logger.log('TasksSchedulerService bootstrapping...');
-      await this.loadJobsFromDB();
+      await this.loadJobsFromDBAsync();
       this.startPolling(); // polling interval defaults to 30s
     } catch (error) {
       this.logger.error(
@@ -43,11 +44,11 @@ export class TasksSchedulerService {
    * Poll the database periodically for new tasks or updates.
    * @param intervalMs Polling interval in milliseconds (default: 30 seconds)
    */
-  public startPolling(intervalMs: number = 30000): void {
+  public startPolling = (intervalMs: number = 30000): void => {
     setInterval(async () => {
       try {
         this.logger.log('Polling database for tasks to execute...');
-        await this.loadJobsFromDB();
+        await this.loadJobsFromDBAsync();
       } catch (error) {
         this.logger.error('Error during task polling', error.stack);
       }
@@ -58,7 +59,7 @@ export class TasksSchedulerService {
    * Load active tasks from the database and register their cron jobs.
    * Completed and failed tasks are re-run, scheduled tasks are registered.
    */
-  private async loadJobsFromDB(): Promise<void> {
+  private loadJobsFromDBAsync = async (): Promise<void> => {
     // Reload completed and failed tasks to potentially rerun them
     const completedOrFailedTasks = await this.taskRepository.find({
       where: {
@@ -100,7 +101,7 @@ export class TasksSchedulerService {
    * Stop all tasks that have been cancelled.
    * @param task Task to stop.
    */
-  private stopCronJob(task: Task): void {
+  private stopCronJob = (task: Task): void => {
     const taskKey = `task-${task.id}`;
     if (this.schedulerRegistry.doesExist('cron', taskKey)) {
       const existingJob = this.schedulerRegistry.getCronJob(taskKey);
@@ -115,7 +116,7 @@ export class TasksSchedulerService {
    * Stops and removes the existing cron job before re-registering.
    * @param task Task to re-run
    */
-  private reRunCronJob(task: Task): void {
+  private reRunCronJob = (task: Task): void => {
     this.stopCronJob(task);
     this.registerCronJob(task);
   }
@@ -124,7 +125,7 @@ export class TasksSchedulerService {
    * Register a new cron job for a task.
    * @param task Task to schedule
    */
-  private registerCronJob(task: Task): void {
+  private registerCronJob = (task: Task): void => {
     const taskKey = `task-${task.id}`;
     const cronJob = this.createCronJob(task);
 
@@ -139,20 +140,28 @@ export class TasksSchedulerService {
    * @param task Task to execute
    * @returns CronJob
    */
-  private createCronJob(task: Task): CronJob {
+  private createCronJob = (task: Task): CronJob => {
+    if (!task.cronExpression) {
+      throw new Error('Cron expression is missing for the task');
+    }
+
+    if (!isValidCron(task.cronExpression, { seconds: true })) {
+      throw new Error(`Invalid cron expression`);
+    }
+
     return new CronJob(task.cronExpression, async () => {
       try {
         this.logger.log(`Executing task: ${task.id} - ${task.name}`);
 
         // Mark task as QUEUED before execution
-        await this.tasksStatusService.updateStatus(task.id, TaskStatus.QUEUED, [
+        await this.tasksStatusService.updateStatusAsync(task.id, TaskStatus.QUEUED, [
           TaskStatus.SCHEDULED,
           TaskStatus.COMPLETED,
           TaskStatus.FAILED,
         ]);
 
         // Execute the actual task logic
-        await this.tasksRunnerService.executeTask(task);
+        await this.tasksRunnerService.executeTaskAsync(task);
       } catch (error) {
         this.logger.error(
           `Error executing task ${task.id}: ${error.message}`,

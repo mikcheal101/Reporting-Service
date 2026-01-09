@@ -7,9 +7,6 @@ export class ExcelExporter extends ReportExporter implements IReportExporter {
     const workbook: Workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Generated Report');
 
-    console.log('workbook: ', workbook);
-    console.log('worksheet: ', worksheet);
-
     if (!data || data.length === 0) {
       const buffer = await workbook.xlsx.writeBuffer();
       return Buffer.from(buffer);

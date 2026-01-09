@@ -3,7 +3,7 @@ import { AiQuerySchemaDto } from './ai-query-schema.dto';
 
 export class AiQueryGenerationRequestDto {
   @IsString()
-  reportId: string;
+  reportId: number;
 
   @IsString()
   prompt: string;

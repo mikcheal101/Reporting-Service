@@ -1,3 +1,5 @@
+// report-types/report-types.service.ts
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReportType } from './entity/report-types.entity';
@@ -21,7 +23,7 @@ export class ReportTypesService {
     this.logger = new Logger(ReportTypesService.name);
   }
 
-  public async fetchAll(): Promise<ReportTypeDto[]> {
+  public fetchAllAsync = async (): Promise<ReportTypeDto[]> => {
     try {
       const reportTypes: ReportType[] = await this.reportTypeRepository.find();
       const ReportTypeDtos: ReportTypeDto[] = [];
@@ -35,7 +37,7 @@ export class ReportTypesService {
     }
   }
 
-  public async fetchOne(id: number): Promise<ReportTypeDto> {
+  public fetchOneAsync = async (id: number): Promise<ReportTypeDto> => {
     try {
       const reportType: ReportType = await this.reportTypeRepository.findOneBy({
         id,
@@ -47,9 +49,9 @@ export class ReportTypesService {
     }
   }
 
-  public async create(
+  public createAsync = async (
     createReportTypeRequestDto: CreateReportTypeRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportTypeDto> => {
     try {
       // check if the report type already exists
       const exists = await this.reportTypeRepository.findOneBy({
@@ -68,18 +70,18 @@ export class ReportTypesService {
         outputType: createReportTypeRequestDto.outputType,
       });
 
-      await this.reportTypeRepository.save(reportType);
-      return true;
+      const savedReportType = await this.reportTypeRepository.save(reportType);
+      return this.reportTypeUtils.convertToDto(savedReportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async update(
+  public updateAsync = async (
     id: number,
     updateReportTypeRequestDto: UpdateReportTypeRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ReportTypeDto> => {
     try {
       // fetch the report type
       const reportType = await this.reportTypeRepository.findOne({
@@ -120,15 +122,15 @@ export class ReportTypesService {
         reportType.outputType = updateReportTypeRequestDto.outputType;
       }
 
-      await this.reportTypeRepository.save(reportType);
-      return true;
+      const updatedReportType = await this.reportTypeRepository.save(reportType);
+      return this.reportTypeUtils.convertToDto(updatedReportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async delete(id: number): Promise<boolean> {
+  public deleteAsync = async (id: number): Promise<boolean> => {
     try {
       const removed = await this.reportTypeRepository.delete({ id });
       return removed.affected > 0;

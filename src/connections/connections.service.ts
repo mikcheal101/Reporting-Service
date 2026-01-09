@@ -1,14 +1,17 @@
+// connections/connections.service.ts
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateConnectionRequestDto } from './dto/create-connection.request.dto';
 import { CryptoService } from 'src/common/security/crypto/crypto.service';
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
-import { UpdateConnectionResponseDto } from './dto/update-connection.response.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
 import { DatabaseFactory } from './database.factory';
 import { Connection } from './entity/connections.entity';
 import { ConnectionTablesResponseDto } from './dto/connection-tables.response.dto';
+import { ConnectionDto } from './dto/connection.dto';
+import { ConnectionUtils } from './utils/connection.utils';
 
 @Injectable()
 export class ConnectionsService {
@@ -17,35 +20,41 @@ export class ConnectionsService {
   constructor(
     @InjectRepository(Connection)
     private readonly connectionsRepository: Repository<Connection>,
+    private readonly connectionUtils: ConnectionUtils,
     private readonly cryptoService: CryptoService,
   ) {
     this.logger = new Logger(ConnectionsService.name);
   }
 
-  public async testConnection(
+  public testConnectionAsync = async (
     testConnectionDto: TestConnectionRequestDto,
-  ): Promise<boolean> {
+  ): Promise<boolean> => {
     try {
       const adapter = DatabaseFactory.create(testConnectionDto);
-      return await adapter.connect();
+      return await adapter.connectAsync();
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async getAllConnections(): Promise<Connection[]> {
+  public connectionsAsync = async(): Promise<Connection[]> => {
     try {
-      return await this.connectionsRepository.find();
+      let conns = await this.connectionsRepository.find();
+      conns = conns.map((connection) => {
+        connection.password = this.cryptoService.decrypt(connection.password);
+        return connection;
+      });
+      return conns;
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async createConnection(
+  public createConnectionAsync = async (
     connection: CreateConnectionRequestDto,
-  ): Promise<boolean> {
+  ): Promise<ConnectionDto> => {
     try {
       const exists = await this.connectionsRepository.findOneBy({
         name: connection.name,
@@ -59,7 +68,7 @@ export class ConnectionsService {
       const newConnection = this.connectionsRepository.create({
         name: connection.name,
         server: connection.server,
-        port: Number.parseInt(connection.port),
+        port: connection.port,
         user: connection.user,
         password: encryptedPassword,
         database: connection.database,
@@ -67,18 +76,20 @@ export class ConnectionsService {
         isTestSuccessful: connection.isTestSuccessful,
       });
 
-      await this.connectionsRepository.save(newConnection);
-      return true;
+      const savedConnection =
+        await this.connectionsRepository.save(newConnection);
+
+      return this.connectionUtils.convertToDto(savedConnection);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async updateConnection(
+  public updateConnectionAsync = async (
     id: string,
     conn: UpdateConnectionRequestDto,
-  ): Promise<UpdateConnectionResponseDto> {
+  ): Promise<ConnectionDto> => {
     try {
       const connection = await this.connectionsRepository.findOneBy({
         id: Number.parseInt(id),
@@ -94,16 +105,17 @@ export class ConnectionsService {
       // merge the two models
       Object.assign(connection, conn);
 
-      await this.connectionsRepository.save(connection);
+      const updatedConnection =
+        await this.connectionsRepository.save(connection);
 
-      return { isUpdated: true };
+      return this.connectionUtils.convertToDto(updatedConnection);
     } catch (error) {
-      console.log(error);
+      this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   }
 
-  public async getOneConnection(id: string): Promise<Connection> {
+  public getOneConnectionAsync = async (id: string): Promise<Connection> => {
     try {
       const connection = await this.connectionsRepository.findOneBy({
         id: Number.parseInt(id),
@@ -115,7 +127,7 @@ export class ConnectionsService {
     }
   }
 
-  public async getDecryptedConnection(id: number): Promise<Connection> {
+  public getDecryptedConnectionAsync = async (id: number): Promise<Connection> => {
     try {
       const connection = await this.connectionsRepository.findOneBy({
         id: id,
@@ -130,7 +142,7 @@ export class ConnectionsService {
     }
   }
 
-  public async removeConnection(id: string): Promise<boolean> {
+  public removeConnectionAsync = async (id: string): Promise<boolean> => {
     try {
       const deleted = await this.connectionsRepository.delete({
         id: Number.parseInt(id),
@@ -142,9 +154,9 @@ export class ConnectionsService {
     }
   }
 
-  public async getConnectionTables(
+  public getConnectionTablesAsync = async (
     id: number,
-  ): Promise<ConnectionTablesResponseDto[]> {
+  ): Promise<ConnectionTablesResponseDto[]> => {
     // get the connection and its details
     const connection = await this.connectionsRepository.findOneBy({ id });
 
@@ -155,7 +167,7 @@ export class ConnectionsService {
       database: connection.database,
       databaseType: connection.databaseType,
       password: this.cryptoService.decrypt(connection.password),
-      port: `${connection.port}`,
+      port: connection.port,
       server: connection.server,
       user: connection.user,
     });
@@ -163,8 +175,8 @@ export class ConnectionsService {
     let connectionTablesResponseDto: ConnectionTablesResponseDto[] = [];
 
     try {
-      await adapter.connect();
-      const response = await adapter.query(
+      await adapter.connectAsync();
+      const response = await adapter.queryAsync(
         DatabaseFactory.getSchemaQueryForDatabase(connection.databaseType),
       );
 
@@ -194,8 +206,6 @@ export class ConnectionsService {
           >,
         ),
       );
-
-      console.log('query response: ', connectionTablesResponseDto);
       return connectionTablesResponseDto;
     } catch (error) {
       this.logger.error(error.message, error.stack);

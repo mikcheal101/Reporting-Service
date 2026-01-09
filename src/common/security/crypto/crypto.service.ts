@@ -22,6 +22,7 @@ export class CryptoService {
   }
 
   decrypt(cipher: string): string {
+    if (!cipher) return '';
     const [ivHex, encryptedHex] = cipher.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const encrypted = Buffer.from(encryptedHex, 'hex');

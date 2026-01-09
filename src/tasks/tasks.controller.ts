@@ -25,7 +25,7 @@ export class TasksController {
     @Body() scheduleTaskRequestDto: ScheduleTaskRequestDto,
   ): Promise<void> {
     try {
-      return await this.tasksService.scheduleTask(scheduleTaskRequestDto);
+      return await this.tasksService.scheduleTaskAsync(scheduleTaskRequestDto);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -35,7 +35,7 @@ export class TasksController {
   @Get('pending-tasks')
   public async pendingTasks(): Promise<Task[]> {
     try {
-      return await this.tasksService.fetchPendingTasks();
+      return await this.tasksService.fetchPendingTasksAsync();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -45,7 +45,7 @@ export class TasksController {
   @Get('completed-tasks')
   public async completedTasks(): Promise<Task[]> {
     try {
-      return await this.tasksService.fetchCompletedTasks();
+      return await this.tasksService.fetchCompletedTasksAsync();
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -58,13 +58,11 @@ export class TasksController {
     @Res() response: Response,
   ): Promise<void> {
     try {
-      const filename = await this.tasksService.createDownloadPath(
+      const filename = await this.tasksService.createDownloadPathAsync(
         Number.parseInt(id),
       );
 
       const filePath: string = join(__dirname, '..', 'media', filename);
-      console.log('filename: ', filename);
-      console.log('filepath: ', filePath);
 
       // set headers and download
       response.setHeader(
