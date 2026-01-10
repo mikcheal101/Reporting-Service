@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleUtils } from 'src/common/utils/role.utils';
-import { PermissionDto } from 'src/users/dto/permission.dto';
+import PermissionRequestDto from 'src/users/dto/permission.request.dto';
 import { RoleDto } from 'src/users/dto/role.dto';
 import { Role } from 'src/users/entity/roles.entity';
 import { Repository } from 'typeorm';
@@ -18,8 +18,11 @@ export class RolesService {
     this.logger = new Logger(RolesService.name);
   }
 
-  public createAsync = async (name: string, permissions: PermissionDto[]): Promise<RoleDto> => {
+  public createAsync = async (name: string, permissions: PermissionRequestDto[]): Promise<RoleDto> => {
     try {
+      // lowercase the name
+      name = name.toLowerCase();
+
       // Check if the role exists
       const existingRole: RoleDto = await this.findByNameAsync(name);
       if (existingRole) {
@@ -27,26 +30,34 @@ export class RolesService {
       }
 
       // Create the role
-      const role: Role = await this.rolesRepository.save({
+      const newRole: Role = await this.rolesRepository.save({
         name,
         permissions: permissions.map((permission) => ({
           id: permission.id,
         })),
       });
-      return this.roleUtils.mapRoleToDto(role);
+
+      const savedRole: RoleDto = await this.findOneAsync(newRole.id);
+
+      return savedRole;
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
   };
 
-  public updateAsync = async (id: number, name: string, permissions: PermissionDto[]): Promise<RoleDto> => {
+  public updateAsync = async (id: number, name: string, permissions: PermissionRequestDto[]): Promise<RoleDto> => {
     try {
+      name = name.toLowerCase();
+
       // Check if the role exists
       const existingRole: RoleDto = await this.findOneAsync(id);
       if (!existingRole) {
         throw new Error('Role not found');
       }
+
+      // deny updating the super admin
+      this.denySuperAdminUpdate(existingRole.name);
 
       // Update the role
       const role: Role = await this.rolesRepository.save({
@@ -56,7 +67,9 @@ export class RolesService {
           id: permission.id,
         })),
       });
-      return this.roleUtils.mapRoleToDto(role);
+
+      const updatedRole: RoleDto = await this.findOneAsync(role.id);
+      return updatedRole;
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
@@ -86,6 +99,9 @@ export class RolesService {
           permissions: true,
         }
       });
+
+      if (!role) return null;
+
       return this.roleUtils.mapRoleToDto(role);
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -109,10 +125,13 @@ export class RolesService {
 
   public deleteAsync = async (id: number): Promise<boolean> => {
     try {
-      const role: RoleDto = await this.findOneAsync(id);
-      if (!role) {
+      const existingRole: RoleDto = await this.findOneAsync(id);
+      if (!existingRole) {
         throw new Error('Role not found');
       }
+
+      // deny updating the super admin
+      this.denySuperAdminUpdate(existingRole.name);
 
       await this.rolesRepository.delete(id);
 
@@ -121,5 +140,10 @@ export class RolesService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
+  }
+
+  private denySuperAdminUpdate = (existingRoleName: string) => {
+    // confirm its not super-admin
+    if (existingRoleName.toLowerCase() === "super-admin") throw new Error('Role cannot be modified!');
   }
 }

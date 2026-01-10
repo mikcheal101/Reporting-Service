@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/users.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserUtils } from 'src/common/utils/user.utils';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -64,7 +64,9 @@ export class UsersService {
           isActive: true,
         },
         relations: {
-          roles: true,
+          roles: {
+            permissions: true,
+          },
           permissions: true,
         }
       });
@@ -165,27 +167,42 @@ export class UsersService {
     }
   }
 
-  public assignRoleAsync = async (id: number, roleId: number): Promise<boolean> => {
+  public assignRoleAsync = async (id: number, roleIds: Array<number>): Promise<boolean> => {
     try {
+
+      if (!roleIds.length) throw new Error('No roles selected to assign!');
+      
       // fetch the user and role
       const user: User = await this.usersRepository.findOne({
         where: { id, isActive: true },
         relations: {
-          roles: true,
+          roles: {
+            permissions: true,
+          },
+          permissions: true,
         }
       });
       if (!user) throw new Error(`User with ${id} was not found!`);
 
-      const role: Role = await this.rolesRepository.findOne({
-        where: { id: roleId }
+      // Fetch the roles to assign 
+      const rolesToAssign: Array<Role> = await this.rolesRepository.findBy({
+        id: In(roleIds)
       });
-      if (!role) throw new Error(`Role with ${roleId} was not found!`);
 
-      // check if assignment exists
-      const alreadyExists: boolean = user.roles.some((searchedRole: Role) => searchedRole.id === role.id);
-      if (alreadyExists) return true;
+      // Prevent adding super admin rights to a user
+      const tryingToCreateSuperAdmin: boolean = rolesToAssign.some((role: Role) => role.name.toLowerCase() === 'super-admin');
+      if (tryingToCreateSuperAdmin) throw new Error('Cannot assign super administrator rights to any user!');
 
-      user.roles.push(role);
+      // Prevent removing super admin rights from an existing super admin
+      let isRemovingSuperAdminRights: boolean = user.roles.some((role: Role) => role.name.toLowerCase() === 'super-admin');
+      isRemovingSuperAdminRights = isRemovingSuperAdminRights && !rolesToAssign.some((role: Role) => role.name.toLowerCase() === 'super-admin');
+      if (isRemovingSuperAdminRights) throw new Error('Cannot remove super admin rights!');
+
+      // assign new roles
+      rolesToAssign.forEach((role: Role) => {
+        if (!user.roles.some((userRole: Role) => userRole.id === role.id)) user.roles.push(role);
+      });
+
       await this.usersRepository.save(user);
       return true;
     } catch (error) {

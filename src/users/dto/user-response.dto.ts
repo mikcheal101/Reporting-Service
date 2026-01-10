@@ -1,8 +1,8 @@
 // users/dto/user-response.dto.ts
 
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PermissionDto } from './permission.dto';
 import { RoleDto } from './role.dto';
+import PermissionDto from './permission.dto';
 
 export class UserResponseDto {
   @IsNumber()

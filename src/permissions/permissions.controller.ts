@@ -1,13 +1,13 @@
 import { BadRequestException, Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { PermissionDto } from 'src/users/dto/permission.dto';
+import PermissionDto from 'src/users/dto/permission.dto';
 
-@Controller('permissions')
+@Controller('/api/v1/permissions')
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Get('permissions')
+  @Get('')
   public async permissions(): Promise<PermissionDto[]> {
     try {
       return await this.permissionsService.findAllAsync();

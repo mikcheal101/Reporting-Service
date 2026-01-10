@@ -10,7 +10,7 @@ export class RoleSeed {
   static run = async (applicationContext: INestApplicationContext) => {
     const roleRepository = applicationContext.get<Repository<Role>>(getRepositoryToken(Role));
 
-    const name = 'super-admin';
+    const name = 'super-admin'.toLowerCase();
     let superAdmin: Role = await roleRepository.findOne({
       where: { name },
       relations: {

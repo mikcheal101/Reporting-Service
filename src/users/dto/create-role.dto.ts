@@ -1,10 +1,15 @@
 // users/dto/create-role.dto.ts
 
-import { IsString } from 'class-validator';
-import { PermissionDto } from './permission.dto';
+import { IsArray, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import PermissionRequestDto from './permission.request.dto';
 
 export default class CreateRoleDto {
   @IsString()
   name: string;
-  permissions: PermissionDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PermissionRequestDto)
+  permissions: PermissionRequestDto[];
 };

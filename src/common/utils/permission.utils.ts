@@ -1,7 +1,7 @@
 // common/utils/permission.utils.ts
 
 import { Injectable } from "@nestjs/common";
-import { PermissionDto } from "src/users/dto/permission.dto";
+import PermissionDto from "src/users/dto/permission.dto";
 import { Permission } from "src/users/entity/permissions.entity";
 
 @Injectable()

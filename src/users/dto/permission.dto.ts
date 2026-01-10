@@ -1,13 +1,14 @@
 // users/dto/permission.dto.ts
 
-import { IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsString } from 'class-validator';
 
-export class PermissionDto {
+export default class PermissionDto {
   @IsNumber()
   id: number;
 
   @IsString()
   name: string;
   
+  @IsDateString()
   createdAt: Date;
 }

@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserResponseDto } from './dto/user-response.dto';
-import { PermissionDto } from './dto/permission.dto';
 import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
 import AssignRoleDto from './dto/assign-role.dto';
@@ -91,7 +90,7 @@ export class UsersController {
   @Post('assign-role')
   public async assignRole(@Body() assignRoleDto: AssignRoleDto): Promise<boolean> {
     try {
-      return await this.usersService.assignRoleAsync(assignRoleDto.userId, assignRoleDto.roleId);
+      return await this.usersService.assignRoleAsync(assignRoleDto.userId, assignRoleDto.roleIds);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
