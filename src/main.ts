@@ -6,11 +6,19 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: frontendUrl,
     credentials: true,
   });
   app.use(cookieParser());
-  await app.listen(4050);
+
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4050;
+
+  await app.listen(port);
+
+  // Log the URL for confirmation
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`🌐 CORS enabled for: ${frontendUrl}`);
 }
 bootstrap();
