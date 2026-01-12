@@ -192,7 +192,7 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     } finally {
-      adapter.close();
+      adapter.closeAsync();
     }
   }
 
