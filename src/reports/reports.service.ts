@@ -186,7 +186,7 @@ export class ReportsService {
 
     try {
       await adapter.connectAsync();
-      const response = await adapter.query(limitedQueryString, parameters);
+      const response = await adapter.queryAsync(limitedQueryString, parameters);
       return JSON.stringify(response);
     } catch (error) {
       this.logger.error(error.message, error.stack);
