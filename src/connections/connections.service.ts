@@ -211,7 +211,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     } finally {
-      await adapter.close();
+      await adapter.closeAsync();
     }
   }
 }
