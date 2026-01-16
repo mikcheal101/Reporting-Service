@@ -36,9 +36,9 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
-  public connectionsAsync = async(): Promise<Connection[]> => {
+  public connectionsAsync = async (): Promise<Connection[]> => {
     try {
       let conns = await this.connectionsRepository.find();
       conns = conns.map((connection) => {
@@ -50,7 +50,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public createConnectionAsync = async (
     connection: CreateConnectionRequestDto,
@@ -84,7 +84,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public updateConnectionAsync = async (
     id: string,
@@ -113,7 +113,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public getOneConnectionAsync = async (id: string): Promise<Connection> => {
     try {
@@ -125,9 +125,11 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
-  public getDecryptedConnectionAsync = async (id: number): Promise<Connection> => {
+  public getDecryptedConnectionAsync = async (
+    id: number,
+  ): Promise<Connection> => {
     try {
       const connection = await this.connectionsRepository.findOneBy({
         id: id,
@@ -140,7 +142,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public removeConnectionAsync = async (id: string): Promise<boolean> => {
     try {
@@ -152,7 +154,7 @@ export class ConnectionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public getConnectionTablesAsync = async (
     id: number,
@@ -213,5 +215,5 @@ export class ConnectionsService {
     } finally {
       await adapter.closeAsync();
     }
-  }
+  };
 }

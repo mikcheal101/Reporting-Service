@@ -25,7 +25,9 @@ export class ConnectionsController {
     @Body() testConnectionDto: TestConnectionRequestDto,
   ) {
     try {
-      return await this.connectionsService.testConnectionAsync(testConnectionDto);
+      return await this.connectionsService.testConnectionAsync(
+        testConnectionDto,
+      );
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -87,7 +89,9 @@ export class ConnectionsController {
   @Get(':id/tables')
   public async getConnectionTables(@Param('id') id: string) {
     try {
-      return this.connectionsService.getConnectionTablesAsync(Number.parseInt(id));
+      return this.connectionsService.getConnectionTablesAsync(
+        Number.parseInt(id),
+      );
     } catch (error) {
       throw new BadRequestException(error.message);
     }

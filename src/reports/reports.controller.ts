@@ -33,7 +33,9 @@ export class ReportsController {
     @Body() createReportRequestDto: CreateReportRequestDto,
   ): Promise<ReportDto> {
     try {
-      return await this.reportsService.createReportAsync(createReportRequestDto);
+      return await this.reportsService.createReportAsync(
+        createReportRequestDto,
+      );
     } catch (error) {
       throw new BadGatewayException(error.message);
     }

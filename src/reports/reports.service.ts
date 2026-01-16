@@ -56,7 +56,7 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public fetchAllAsync = async (): Promise<ReportDto[]> => {
     try {
@@ -70,7 +70,7 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public findOneAsync = async (id: number): Promise<ReportDto> => {
     try {
@@ -87,7 +87,7 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public deleteAsync = async (id: number): Promise<boolean> => {
     try {
@@ -97,14 +97,13 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public updateAsync = async (
     id: number,
     updateReportRequestDto: UpdateReportRequestDto,
   ): Promise<ReportDto> => {
     try {
-  
       // get the report to update
       const previous = await this.reportRepository.findOneBy({ id });
       if (!previous) throw new Error('Invalid Report ID!');
@@ -137,9 +136,11 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
-  public getReportParametersAsync = async (id: number): Promise<QueryParameter[]> => {
+  public getReportParametersAsync = async (
+    id: number,
+  ): Promise<QueryParameter[]> => {
     try {
       // get the parameters by Report
       return await this.queryParameterRepository.findBy({
@@ -149,7 +150,7 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public testQueryAsync = async (
     queryRequestDto: QueryRequestDto,
@@ -178,15 +179,12 @@ export class ReportsService {
       queryRequestDto.parameters,
     );
 
-    const limitedQueryString: string = DatabaseFactory.wrapQueryWithLimit(
-      report.connection.databaseType,
-      queryRequestDto.queryString,
-      5,
-    );
-
     try {
       await adapter.connectAsync();
-      const response = await adapter.queryAsync(limitedQueryString, parameters);
+      const response = await adapter.queryAsync(
+        queryRequestDto.queryString,
+        parameters,
+      );
       return JSON.stringify(response);
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -194,9 +192,11 @@ export class ReportsService {
     } finally {
       adapter.closeAsync();
     }
-  }
+  };
 
-  public saveQueryAsync = async (queryRequestDto: QueryRequestDto): Promise<boolean> => {
+  public saveQueryAsync = async (
+    queryRequestDto: QueryRequestDto,
+  ): Promise<boolean> => {
     try {
       // get the report
       const report = await this.reportRepository.findOneBy({
@@ -230,14 +230,16 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public generateQueryViaAIAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
   ): Promise<string> => {
     try {
       // get the query
-      const aiPrompt = await this.generateAiPromptAsync(aiQueryGenerationRequestDto);
+      const aiPrompt = await this.generateAiPromptAsync(
+        aiQueryGenerationRequestDto,
+      );
 
       // send the prompt to the server
       const ollamaResponse = await fetch(process.env.OLLAMA_API || '', {
@@ -268,9 +270,9 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
-  private generateAiPromptAsync = async (
+  private readonly generateAiPromptAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
   ): Promise<string> => {
     try {
@@ -324,5 +326,5 @@ export class ReportsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 }
