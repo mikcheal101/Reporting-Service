@@ -9,6 +9,7 @@ import { UpdateReportTypeRequestDto } from './dto/update-report-type.request.dto
 import { ReportTypeDto } from './dto/report-type.dto';
 import { ReportTypeUtils } from './utils/report-type.utils';
 import { CronUtil } from 'src/common/utils/cron.utils';
+import { Task } from 'src/tasks/entity/task.entity';
 
 @Injectable()
 export class ReportTypesService {
@@ -17,6 +18,10 @@ export class ReportTypesService {
   constructor(
     @InjectRepository(ReportType)
     private readonly reportTypeRepository: Repository<ReportType>,
+
+    @InjectRepository(Task)
+    private readonly taskRepository: Repository<Task>,
+
     private readonly reportTypeUtils: ReportTypeUtils,
     private readonly cronUtil: CronUtil,
   ) {
@@ -35,7 +40,7 @@ export class ReportTypesService {
       this.logger.error(error.message, error.stack);
       throw new Error(error);
     }
-  }
+  };
 
   public fetchOneAsync = async (id: number): Promise<ReportTypeDto> => {
     try {
@@ -47,7 +52,7 @@ export class ReportTypesService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public createAsync = async (
     createReportTypeRequestDto: CreateReportTypeRequestDto,
@@ -76,7 +81,7 @@ export class ReportTypesService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public updateAsync = async (
     id: number,
@@ -105,6 +110,8 @@ export class ReportTypesService {
         reportType.frequency = updateReportTypeRequestDto.frequency;
       }
 
+      const tasksToUpdate: Array<Task> = [];
+
       if (updateReportTypeRequestDto.datetime) {
         reportType.datetime = updateReportTypeRequestDto.datetime;
 
@@ -114,6 +121,7 @@ export class ReportTypesService {
               reportType.datetime,
               reportType.frequency,
             );
+            tasksToUpdate.push(report.task);
           }
         });
       }
@@ -122,13 +130,19 @@ export class ReportTypesService {
         reportType.outputType = updateReportTypeRequestDto.outputType;
       }
 
-      const updatedReportType = await this.reportTypeRepository.save(reportType);
+      const updatedReportType =
+        await this.reportTypeRepository.save(reportType);
+
+      if (tasksToUpdate.length > 0) {
+        await this.taskRepository.save(tasksToUpdate);
+      }
+
       return this.reportTypeUtils.convertToDto(updatedReportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
   public deleteAsync = async (id: number): Promise<boolean> => {
     try {
@@ -138,5 +152,5 @@ export class ReportTypesService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 }
