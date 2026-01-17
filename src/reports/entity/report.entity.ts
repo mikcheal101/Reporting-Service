@@ -37,7 +37,7 @@ export class Report {
   @OneToMany(() => ReportDetail, (reportDetail) => reportDetail.report)
   reportDetails: ReportDetail[];
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   queryString?: string;
 
   @OneToMany(() => QueryParameter, (parameter) => parameter.report)
