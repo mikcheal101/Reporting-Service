@@ -127,6 +127,14 @@ export class TasksSchedulerService {
    */
   private readonly registerCronJob = (task: Task): void => {
     const taskKey = `task-${task.id}`;
+
+    if (this.schedulerRegistry.doesExist('cron', taskKey)) {
+      this.logger.warn(
+        `Cron with ${taskKey} already exists, skipping registration!`,
+      );
+      return;
+    }
+
     const cronJob = this.createCronJob(task);
 
     this.schedulerRegistry.addCronJob(taskKey, cronJob);
