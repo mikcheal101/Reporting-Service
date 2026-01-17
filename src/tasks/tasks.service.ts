@@ -20,7 +20,9 @@ export class TasksService {
     private readonly cronUtil: CronUtil,
   ) {}
 
-  private createTaskAsync = async (report: ReportDto): Promise<Task> => {
+  private readonly createTaskAsync = async (
+    report: ReportDto,
+  ): Promise<Task> => {
     const dateTime: Date = new Date(
       `${report.reportType?.runDate}T${report.reportType?.runTime}`,
     );
@@ -38,7 +40,7 @@ export class TasksService {
     });
 
     return task;
-  }
+  };
 
   public scheduleTaskAsync = async (
     scheduleTaskRequestDto: ScheduleTaskRequestDto,
@@ -52,7 +54,9 @@ export class TasksService {
       });
 
       if (exists) {
-        throw new Error('Report already scheduled!');
+        const errorMessage: string = `Report already scheduled with id: ${exists.id}!`;
+        this.logger.warn(errorMessage);
+        throw new Error(errorMessage);
       }
 
       if (scheduleTaskRequestDto.generateNow) {
@@ -66,7 +70,7 @@ export class TasksService {
       this.logger.error(error.message);
       throw new Error(error.message);
     }
-  }
+  };
 
   public fetchPendingTasksAsync = async (): Promise<Task[]> => {
     try {
@@ -85,7 +89,7 @@ export class TasksService {
       this.logger.error(error.message, error);
       throw new Error(error.message);
     }
-  }
+  };
 
   public fetchCompletedTasksAsync = async (): Promise<Task[]> => {
     try {
@@ -104,7 +108,7 @@ export class TasksService {
       this.logger.error(error.message, error);
       throw new Error(error.message);
     }
-  }
+  };
 
   public createDownloadPathAsync = async (id: number): Promise<string> => {
     try {
@@ -141,9 +145,9 @@ export class TasksService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 
-  private getReportAsync = async (
+  private readonly getReportAsync = async (
     scheduleTaskRequestDto: ScheduleTaskRequestDto,
   ): Promise<ReportDto> => {
     //get the report.
@@ -158,5 +162,5 @@ export class TasksService {
     }
 
     return report;
-  }
+  };
 }
