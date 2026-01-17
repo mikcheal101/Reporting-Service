@@ -75,6 +75,10 @@ export class TasksSchedulerService {
         },
       },
     });
+    this.logger.log(
+      `Fetched completedOrFailedTasks: ${completedOrFailedTasks.length}.`,
+    );
+
     completedOrFailedTasks.forEach((task: Task) => {
       if (task.report?.reportType?.frequency !== Frequency.ON_REQUEST) {
         this.reRunCronJob(task);
@@ -85,6 +89,8 @@ export class TasksSchedulerService {
     const stoppedTasks = await this.taskRepository.findBy({
       status: In([TaskStatus.CANCELLED, TaskStatus.EXPIRED]),
     });
+    this.logger.log(`Fetched stoppedTasks: ${stoppedTasks.length}.`);
+
     stoppedTasks.forEach((task: Task) => {
       this.stopCronJob(task);
     });
@@ -94,6 +100,8 @@ export class TasksSchedulerService {
       active: true,
       status: In([TaskStatus.SCHEDULED]),
     });
+    this.logger.log(`Fetched scheduledTasks: ${scheduledTasks.length}.`);
+
     scheduledTasks.forEach((task) => this.registerCronJob(task));
   };
 
@@ -107,7 +115,7 @@ export class TasksSchedulerService {
       const existingJob = this.schedulerRegistry.getCronJob(taskKey);
       existingJob.stop();
       this.schedulerRegistry.deleteCronJob(taskKey);
-      this.logger.log(`Re-running task: ${task.id}`);
+      this.logger.log(`Stopping task: ${task.id}`);
     }
   };
 
@@ -129,10 +137,30 @@ export class TasksSchedulerService {
     const taskKey = `task-${task.id}`;
 
     if (this.schedulerRegistry.doesExist('cron', taskKey)) {
-      this.logger.warn(
-        `Cron with ${taskKey} already exists, skipping registration!`,
+      const existingJob = this.schedulerRegistry.getCronJob(taskKey);
+      const existingCronTime = existingJob.cronTime.source;
+      const existingNextDate = existingJob.nextDate();
+
+      this.logger.debug(
+        `Cron job ${taskKey} already registered:\n` +
+          `  - Existing cron: ${existingCronTime}\n` +
+          `  - New cron: ${task.cronExpression}\n` +
+          `  - Next scheduled run: ${existingNextDate.toString()}\n` +
+          `  - LastExecution: ${existingJob.lastExecution}`,
       );
-      return;
+
+      // Check if cron expression has changed
+      if (existingCronTime === task.cronExpression) {
+        this.logger.warn(
+          `Cron ${taskKey} already exists with same expression, skipping registration!`,
+        );
+        return;
+      }
+
+      this.logger.log(
+        `Cron expression changed for task ${task.id}. Re-registering...`,
+      );
+      this.stopCronJob(task);
     }
 
     const cronJob = this.createCronJob(task);
@@ -157,6 +185,7 @@ export class TasksSchedulerService {
       throw new Error(`Invalid cron expression`);
     }
 
+    this.logger.log(`Creating Cronjob: ${task.name}`);
     return new CronJob(task.cronExpression, async () => {
       try {
         this.logger.log(`Executing task: ${task.id} - ${task.name}`);

@@ -45,5 +45,5 @@ export class CronUtil {
       this.logger.error(error.message, error);
       throw new Error(error.message);
     }
-  }
+  };
 }
