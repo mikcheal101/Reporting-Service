@@ -43,7 +43,7 @@ export class Report {
   @OneToMany(() => QueryParameter, (parameter) => parameter.report)
   parameters?: QueryParameter[];
 
-  @OneToOne(() => Task, (task) => task.report, { cascade: true })
+  @OneToOne(() => Task, (task) => task.report, { onDelete: 'CASCADE' })
   task: Task;
 
   @CreateDateColumn()

@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Frequency } from './frequency.enum';
 import { OutputFormat } from '../../common/exporters/output-format.enum';
 import { Report } from 'src/reports/entity/report.entity';
@@ -23,7 +30,9 @@ export class ReportType {
   @Column({ nullable: true })
   outputType: OutputFormat;
 
-  @OneToMany(() => Report, (report) => report.reportType, { cascade: true })
+  @OneToMany(() => Report, (report) => report.reportType, {
+    onDelete: 'CASCADE',
+  })
   reports: Report[];
 
   @CreateDateColumn()
