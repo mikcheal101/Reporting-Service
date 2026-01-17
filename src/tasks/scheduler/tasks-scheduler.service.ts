@@ -86,9 +86,20 @@ export class TasksSchedulerService {
     });
 
     // Stop cron jobs for cancelled or expired tasks
-    const stoppedTasks = await this.taskRepository.findBy({
-      status: In([TaskStatus.CANCELLED, TaskStatus.EXPIRED]),
+    const stoppedTasks = await this.taskRepository.find({
+      where: {
+        status: In([TaskStatus.CANCELLED, TaskStatus.EXPIRED]),
+      },
+      relations: {
+        report: {
+          connection: true,
+          reportType: true,
+          reportDetails: true,
+          parameters: true,
+        },
+      },
     });
+
     this.logger.log(`Fetched stoppedTasks: ${stoppedTasks.length}.`);
 
     stoppedTasks.forEach((task: Task) => {
@@ -96,9 +107,19 @@ export class TasksSchedulerService {
     });
 
     // Load scheduled tasks and register them
-    const scheduledTasks = await this.taskRepository.findBy({
-      active: true,
-      status: In([TaskStatus.SCHEDULED]),
+    const scheduledTasks = await this.taskRepository.find({
+      where: {
+        active: true,
+        status: In([TaskStatus.SCHEDULED]),
+      },
+      relations: {
+        report: {
+          connection: true,
+          reportType: true,
+          reportDetails: true,
+          parameters: true,
+        },
+      },
     });
     this.logger.log(`Fetched scheduledTasks: ${scheduledTasks.length}.`);
 
