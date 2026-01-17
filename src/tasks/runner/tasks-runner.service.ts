@@ -40,7 +40,7 @@ export class TasksRunnerService {
     }
   }
 
-  private exportReportAsync = async (
+  private readonly exportReportAsync = async (
     task: Task,
     databaseResponse: any,
   ): Promise<{
@@ -60,9 +60,9 @@ export class TasksRunnerService {
     const filename: string = `${task.report.name.replaceAll(' ', '_')}${fileExtension}`;
 
     return { buffer, filename };
-  }
+  };
 
-  private sendReportEmailAsync = async (
+  private readonly sendReportEmailAsync = async (
     task: Task,
     filename: string,
     buffer: Buffer,
@@ -74,9 +74,9 @@ export class TasksRunnerService {
       `${task.report.name} Report`,
       { filename, buffer },
     );
-  }
+  };
 
-  private updateTaskStatusAsync = async (
+  private readonly updateTaskStatusAsync = async (
     taskId: number,
     mailSent: boolean,
   ): Promise<void> => {
@@ -85,7 +85,7 @@ export class TasksRunnerService {
     await this.tasksStatusService.updateStatusAsync(taskId, newStatus, [
       TaskStatus.RUNNING,
     ]);
-  }
+  };
 
   public executeTaskAsync = async (task: Task): Promise<void> => {
     try {
@@ -93,7 +93,10 @@ export class TasksRunnerService {
 
       const dbResponse = await this.runReportAsync(task);
 
-      const { buffer, filename } = await this.exportReportAsync(task, dbResponse);
+      const { buffer, filename } = await this.exportReportAsync(
+        task,
+        dbResponse,
+      );
 
       const mediaDirectory: string = join(__dirname, '..', '..', 'media');
       await mkdir(mediaDirectory, { recursive: true });
@@ -106,14 +109,17 @@ export class TasksRunnerService {
       await this.updateTaskStatusAsync(task.id, mailSent);
     } catch (error) {
       this.logger.error(error.message);
-      await this.tasksStatusService.updateStatusAsync(task.id, TaskStatus.FAILED, [
-        TaskStatus.QUEUED,
-        TaskStatus.RUNNING,
-      ]);
+      await this.tasksStatusService.updateStatusAsync(
+        task.id,
+        TaskStatus.FAILED,
+        [TaskStatus.QUEUED, TaskStatus.RUNNING],
+      );
     }
-  }
+  };
 
-  private createAdapter = (connection: Connection): IDatabaseAdapter => {
+  private readonly createAdapter = (
+    connection: Connection,
+  ): IDatabaseAdapter => {
     return DatabaseFactory.create({
       name: connection.name,
       database: connection.database,
@@ -123,12 +129,14 @@ export class TasksRunnerService {
       server: connection.server,
       user: connection.user,
     });
-  }
+  };
 
-  private runReportAsync = async (task: Task) => {
-    await this.tasksStatusService.updateStatusAsync(task.id, TaskStatus.RUNNING, [
-      TaskStatus.QUEUED,
-    ]);
+  private readonly runReportAsync = async (task: Task) => {
+    await this.tasksStatusService.updateStatusAsync(
+      task.id,
+      TaskStatus.RUNNING,
+      [TaskStatus.QUEUED],
+    );
 
     // run the query tied to the report
     const adapter: IDatabaseAdapter = this.createAdapter(
@@ -140,7 +148,11 @@ export class TasksRunnerService {
       task.report.parameters,
     );
     await adapter.connectAsync();
-    const dbResponse = await adapter.queryAsync(task.report.queryString, parameters);
+    const dbResponse = await adapter.queryAsync(
+      task.report.queryString,
+      parameters,
+      3 * 60 * 60 * 1000, // 3 hours
+    );
     return dbResponse;
-  }
+  };
 }

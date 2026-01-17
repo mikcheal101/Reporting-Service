@@ -11,6 +11,7 @@ import {
   Param,
   Post,
   Put,
+  Res,
 } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { CreateReportRequestDto } from './dto/create-report.request.dto';
@@ -18,6 +19,9 @@ import { UpdateReportRequestDto } from './dto/update-report.request.dto';
 import { ReportDto } from './dto/report.dto';
 import { QueryRequestDto } from './dto/query.request.dto';
 import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.dto';
+import DatabaseTimeOutError from 'src/common/errors/databasetimeout.error';
+import DatabaseDeadLockError from 'src/common/errors/databasedeadlock.error';
+import { Response } from 'express';
 
 @Controller('/api/v1/reports')
 export class ReportsController {
@@ -51,16 +55,24 @@ export class ReportsController {
     }
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('test-query')
   public async testQuery(
     @Body() queryRequestDto: QueryRequestDto,
-  ): Promise<string | undefined> {
+    @Res() response: Response,
+  ): Promise<Response> {
     try {
-      return await this.reportsService.testQueryAsync(queryRequestDto);
+      const result: string =
+        await this.reportsService.testQueryAsync(queryRequestDto);
+      return response.status(HttpStatus.OK).json(result);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new BadRequestException(error.message);
+      if (
+        error instanceof DatabaseTimeOutError ||
+        error instanceof DatabaseDeadLockError
+      ) {
+        return response.status(HttpStatus.ACCEPTED).json(error?.message);
+      }
+      return response.status(HttpStatus.BAD_REQUEST).json(error?.message);
     }
   }
 

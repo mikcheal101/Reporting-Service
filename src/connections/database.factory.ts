@@ -1,3 +1,4 @@
+import { IDatabaseAdapter } from './adapter/idatabase.adapter';
 import { MssqlAdapter } from './adapter/mssql.adapter';
 import { DatabaseType } from './databasetype.enum';
 import { ConnectionRequestDto } from './dto/connection.request.dto';
@@ -5,7 +6,7 @@ import { ConnectionRequestDto } from './dto/connection.request.dto';
 export class DatabaseFactory {
   public static readonly create = (
     connectionRequestDto: ConnectionRequestDto,
-  ): any => {
+  ): IDatabaseAdapter => {
     switch (connectionRequestDto.databaseType) {
       case DatabaseType.MSSQL:
         return new MssqlAdapter(connectionRequestDto);

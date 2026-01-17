@@ -12,6 +12,7 @@ import { CryptoService } from 'src/common/security/crypto/crypto.service';
 import { DatabaseUtils } from 'src/common/utils/database.utils';
 import { QueryParameter } from './entity/query-parameter.entity';
 import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.dto';
+import { IDatabaseAdapter } from 'src/connections/adapter/idatabase.adapter';
 
 @Injectable()
 export class ReportsService {
@@ -165,7 +166,7 @@ export class ReportsService {
 
     if (!report) throw new Error('Report not found!');
 
-    const adapter = DatabaseFactory.create({
+    const adapter: IDatabaseAdapter = DatabaseFactory.create({
       name: report.connection.name,
       database: report.connection.database,
       databaseType: report.connection.databaseType,
@@ -188,7 +189,7 @@ export class ReportsService {
       return JSON.stringify(response);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     } finally {
       adapter.closeAsync();
     }
