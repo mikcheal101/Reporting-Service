@@ -47,10 +47,12 @@ export class TasksRunnerService {
     buffer: Buffer;
     filename: string;
   }> => {
+    this.logger.log(`${task.name} creating export object`);
     const exporter: IReportExporter = ExporterFactory.create(
       task.report.reportType.outputType,
     );
 
+    this.logger.log(`${task.name} init exporting`);
     const buffer: Buffer = await exporter.export(databaseResponse);
 
     // Fetch the emails and send them with the attachments in the format requested
@@ -58,6 +60,7 @@ export class TasksRunnerService {
       task.report.reportType.outputType,
     );
     const filename: string = `${task.report.name.replaceAll(' ', '_')}${fileExtension}`;
+    this.logger.log(`${task.name}: file name created ${filename}.`);
 
     return { buffer, filename };
   };
@@ -67,6 +70,7 @@ export class TasksRunnerService {
     filename: string,
     buffer: Buffer,
   ): Promise<boolean> => {
+    this.logger.log(`${task.name}: sending email!`);
     return await this.mailService.send(
       task.report.reportType.emails
         .split(',')
@@ -89,6 +93,7 @@ export class TasksRunnerService {
 
   public executeTaskAsync = async (task: Task): Promise<void> => {
     try {
+      this.logger.log(`${task.name}: init execution`);
       this.validateTask(task);
 
       const dbResponse = await this.runReportAsync(task);
@@ -104,8 +109,10 @@ export class TasksRunnerService {
       const filePath: string = join(mediaDirectory, filename);
       await writeFile(filePath, buffer);
 
+      this.logger.log(`${task.name} preparing email to send`);
       const mailSent = await this.sendReportEmailAsync(task, filename, buffer);
 
+      this.logger.log(`${task.name}: Email Sent!`);
       await this.updateTaskStatusAsync(task.id, mailSent);
     } catch (error) {
       this.logger.error(error.message);
@@ -132,27 +139,36 @@ export class TasksRunnerService {
   };
 
   private readonly runReportAsync = async (task: Task) => {
+    this.logger.log(`${task.name} update to running!`);
     await this.tasksStatusService.updateStatusAsync(
       task.id,
       TaskStatus.RUNNING,
       [TaskStatus.QUEUED],
     );
 
+    this.logger.log(`${task.name} creating adapter`);
     // run the query tied to the report
     const adapter: IDatabaseAdapter = this.createAdapter(
       task.report.connection,
     );
 
+    this.logger.log(`${task.name} mapping parameters`);
     // convert the result into the format that is expected.
     const parameters = this.databaseUtils.mapDbParameters(
       task.report.parameters,
     );
+
+    this.logger.log(`${task.name} connecting to db`);
     await adapter.connectAsync();
+
+    this.logger.log(`${task.name} Running query`);
     const dbResponse = await adapter.queryAsync(
       task.report.queryString,
       parameters,
       3 * 60 * 60 * 1000, // 3 hours
     );
+
+    this.logger.log(`${task.name} fetching response from query run`);
     return dbResponse;
   };
 }

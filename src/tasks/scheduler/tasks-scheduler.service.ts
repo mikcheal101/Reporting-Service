@@ -132,7 +132,9 @@ export class TasksSchedulerService {
    */
   private readonly stopCronJob = (task: Task): void => {
     const taskKey = `task-${task.id}`;
+    this.logger.log(`${task.name}: Checking the cron job to stop it.`);
     if (this.schedulerRegistry.doesExist('cron', taskKey)) {
+      this.logger.log(`${task.name}: Getting the cron job in the stop loop`);
       const existingJob = this.schedulerRegistry.getCronJob(taskKey);
       existingJob.stop();
       this.schedulerRegistry.deleteCronJob(taskKey);
@@ -146,6 +148,7 @@ export class TasksSchedulerService {
    * @param task Task to re-run
    */
   private readonly reRunCronJob = (task: Task): void => {
+    this.logger.log(`${task.name}: Rerunning the cron job`);
     this.stopCronJob(task);
     this.registerCronJob(task);
   };
@@ -199,11 +202,15 @@ export class TasksSchedulerService {
    */
   private readonly createCronJob = (task: Task): CronJob => {
     if (!task.cronExpression) {
-      throw new Error('Cron expression is missing for the task');
+      const message: string = `${task.name}:  Cron expression is missing for the task`;
+      this.logger.error(message);
+      throw new Error(message);
     }
 
     if (!isValidCron(task.cronExpression, { seconds: true })) {
-      throw new Error(`Invalid cron expression`);
+      const message: string = `${task.name}:  Invalid cron expression`;
+      this.logger.error(message);
+      throw new Error(message);
     }
 
     this.logger.log(`Creating Cronjob: ${task.name}`);
@@ -225,6 +232,7 @@ export class TasksSchedulerService {
           `Error executing task ${task.id}: ${error.message}`,
           error.stack,
         );
+        throw error;
       }
     });
   };
