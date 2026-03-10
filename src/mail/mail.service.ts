@@ -34,5 +34,5 @@ export class MailService {
       this.logger.error(error.message);
       return false;
     }
-  }
+  };
 }
