@@ -47,7 +47,6 @@ export class TasksSchedulerService {
   public startPolling = (intervalMs: number = 30000): void => {
     setInterval(async () => {
       try {
-        this.logger.log('Polling database for tasks to execute...');
         await this.loadJobsFromDBAsync();
       } catch (error) {
         this.logger.error('Error during task polling', error.stack);
@@ -75,9 +74,11 @@ export class TasksSchedulerService {
         },
       },
     });
-    this.logger.log(
-      `Fetched completedOrFailedTasks: ${completedOrFailedTasks.length}.`,
-    );
+    if (completedOrFailedTasks.length > 0) {
+      this.logger.log(
+        `Fetched completedOrFailedTasks: ${completedOrFailedTasks.length}.`,
+      );
+    }
 
     completedOrFailedTasks.forEach((task: Task) => {
       if (task.report?.reportType?.frequency !== Frequency.ON_REQUEST) {
@@ -100,7 +101,9 @@ export class TasksSchedulerService {
       },
     });
 
-    this.logger.log(`Fetched stoppedTasks: ${stoppedTasks.length}.`);
+    if (stoppedTasks.length > 0) {
+      this.logger.log(`Fetched stoppedTasks: ${stoppedTasks.length}.`);
+    }
 
     stoppedTasks.forEach((task: Task) => {
       this.stopCronJob(task);
@@ -121,7 +124,10 @@ export class TasksSchedulerService {
         },
       },
     });
-    this.logger.log(`Fetched scheduledTasks: ${scheduledTasks.length}.`);
+
+    if (scheduledTasks.length > 0) {
+      this.logger.log(`Fetched scheduledTasks: ${scheduledTasks.length}.`);
+    }
 
     scheduledTasks.forEach((task) => this.registerCronJob(task));
   };
@@ -167,10 +173,10 @@ export class TasksSchedulerService {
 
       this.logger.debug(
         `Cron job ${taskKey} already registered:\n` +
-          `  - Existing cron: ${existingCronTime}\n` +
-          `  - New cron: ${task.cronExpression}\n` +
-          `  - Next scheduled run: ${existingNextDate.toString()}\n` +
-          `  - LastExecution: ${existingJob.lastExecution}`,
+        `  - Existing cron: ${existingCronTime}\n` +
+        `  - New cron: ${task.cronExpression}\n` +
+        `  - Next scheduled run: ${existingNextDate.toString()}\n` +
+        `  - LastExecution: ${existingJob.lastExecution}`,
       );
 
       // Check if cron expression has changed

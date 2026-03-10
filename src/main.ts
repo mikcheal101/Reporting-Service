@@ -13,7 +13,7 @@ async function bootstrap() {
   });
   app.use(cookieParser());
 
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4050;
+  const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 4050;
 
   await app.listen(port);
 
