@@ -10,6 +10,7 @@ import { ReportTypeDto } from './dto/report-type.dto';
 import { ReportTypeUtils } from './utils/report-type.utils';
 import { CronUtil } from 'src/common/utils/cron.utils';
 import { Task } from 'src/tasks/entity/task.entity';
+import { TaskStatus } from 'src/tasks/entity/task-status.enum';
 
 @Injectable()
 export class ReportTypesService {
@@ -121,6 +122,7 @@ export class ReportTypesService {
               reportType.datetime,
               reportType.frequency,
             );
+            report.task.status = TaskStatus.SCHEDULED; // changed the status to scheduled
             tasksToUpdate.push(report.task);
           }
         });
