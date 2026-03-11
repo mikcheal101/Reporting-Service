@@ -173,10 +173,10 @@ export class TasksSchedulerService {
 
       this.logger.debug(
         `Cron job ${taskKey} already registered:\n` +
-        `  - Existing cron: ${existingCronTime}\n` +
-        `  - New cron: ${task.cronExpression}\n` +
-        `  - Next scheduled run: ${existingNextDate.toString()}\n` +
-        `  - LastExecution: ${existingJob.lastExecution}`,
+          `  - Existing cron: ${existingCronTime}\n` +
+          `  - New cron: ${task.cronExpression}\n` +
+          `  - Next scheduled run: ${existingNextDate.toString()}\n` +
+          `  - LastExecution: ${existingJob.lastExecution}`,
       );
 
       // Check if cron expression has changed
