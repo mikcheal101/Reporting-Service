@@ -10,7 +10,7 @@ import { RoleUtils } from 'src/common/utils/role.utils';
 import { PermissionUtils } from 'src/common/utils/permission.utils';
 
 @Module({
-  providers: [UsersService, UserUtils, RoleUtils, PermissionUtils ],
+  providers: [UsersService, UserUtils, RoleUtils, PermissionUtils],
   exports: [UsersService, TypeOrmModule],
   imports: [TypeOrmModule.forFeature([User, Role, Permission])],
   controllers: [UsersController],

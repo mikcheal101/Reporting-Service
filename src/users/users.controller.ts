@@ -19,7 +19,7 @@ import AssignPermissionDto from './dto/assign-permission.dto';
 
 @Controller('/api/v1/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @HttpCode(HttpStatus.OK)
   @Get()
@@ -43,7 +43,9 @@ export class UsersController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  public async createUser(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+  public async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<UserResponseDto> {
     try {
       return await this.usersService.createUserAsync(
         createUserDto.username,
@@ -60,7 +62,10 @@ export class UsersController {
 
   @HttpCode(HttpStatus.OK)
   @Put(':id')
-  public async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  public async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
     try {
       return await this.usersService.updateUserAsync(
         Number.parseInt(id),
@@ -88,9 +93,14 @@ export class UsersController {
   // assignments
   @HttpCode(HttpStatus.OK)
   @Post('assign-role')
-  public async assignRole(@Body() assignRoleDto: AssignRoleDto): Promise<boolean> {
+  public async assignRole(
+    @Body() assignRoleDto: AssignRoleDto,
+  ): Promise<boolean> {
     try {
-      return await this.usersService.assignRoleAsync(assignRoleDto.userId, assignRoleDto.roleIds);
+      return await this.usersService.assignRoleAsync(
+        assignRoleDto.userId,
+        assignRoleDto.roleIds,
+      );
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -98,12 +108,16 @@ export class UsersController {
 
   @HttpCode(HttpStatus.OK)
   @Post('assign-permission')
-  public async assignPermission(@Body() assignPermissionDto: AssignPermissionDto): Promise<boolean> {
+  public async assignPermission(
+    @Body() assignPermissionDto: AssignPermissionDto,
+  ): Promise<boolean> {
     try {
-      return await this.usersService.assignPermissionAsync(assignPermissionDto.userId, assignPermissionDto.permissionId);
+      return await this.usersService.assignPermissionAsync(
+        assignPermissionDto.userId,
+        assignPermissionDto.permissionId,
+      );
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-
 }
