@@ -22,6 +22,7 @@ import { PermissionsModule } from './permissions/permissions.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: false,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
