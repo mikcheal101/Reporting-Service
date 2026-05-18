@@ -1,6 +1,6 @@
 # Alcestis Reporting — Feature Roadmap
 
-## Phase 1: Multi-Database Parity (Current)
+## Phase 1: Multi-Database Parity
 - [x] Add PostgreSQL adapter
 - [x] Add MariaDB adapter (via mysql2)
 - [x] Add Oracle adapter
@@ -16,11 +16,14 @@
 - [x] Input validation (ValidationPipe)
 - [x] CORS hardening
 - [ ] Encrypt connection credentials at rest (AES-256)
-- [ ] Audit logging for all database queries
+- [x] SOX-compliant audit logging — global AuditInterceptor auto-logs all POST/PUT/PATCH/DELETE across every entity
+- [x] Audit log viewer UI at `/settings/audit-logs` with entity/action/date filters and pagination
+- [x] Audit permissions (`audit-log.view`, `audit-log.list`) added to seed
 - [ ] Row-level security policies
 - [ ] SQL injection prevention audit
 - [ ] Secrets management (env-based, not hardcoded JWT)
-- [ ] Replace `synchronize: true` with migrations
+- [ ] Replace `synchronize: true` with TypeORM migrations
+- [ ] Password change endpoint (backend)
 
 ## Phase 3: Observability & Reliability
 - [ ] Health check endpoint (`GET /api/v1/health`)
@@ -33,31 +36,39 @@
 - [ ] Error tracking integration (Sentry)
 
 ## Phase 4: Reporting Engine
-- [ ] Scheduled report execution with cron
-- [ ] Report export: PDF, XLSX, CSV
-- [ ] Email delivery of reports
-- [ ] Report templates with parameterized queries
-- [ ] Report execution history with logs
+- [x] Scheduled report execution with cron
+- [x] Report export: PDF, XLSX, CSV
+- [x] Email delivery of reports
+- [x] Report templates with parameterized queries
+- [x] Report execution history with logs
 - [ ] Query timeout per data source
 - [ ] Result caching layer
 - [ ] Large result set streaming
 
-## Phase 5: UX & UI (Velzon-Inspired)
-- [x] Clean light theme with indigo accent
-- [x] Alcestis branding (favicon, logo)
-- [x] Professional light sidebar
-- [ ] Profile dropdown with avatar upload
-- [ ] Dark mode toggle (already scaffolded)
-- [ ] Responsive mobile layout
-- [ ] Loading skeletons
-- [ ] Toast notifications for all CRUD operations
-- [ ] Empty states with illustrations
-- [ ] Error boundaries per page
+## Phase 5: UX & UI
+- [x] Clean light theme with dark-blue primary (`--primary: 227 36% 39%`)
+- [x] Alcestis branding (favicon, logo, sidebar brand)
+- [x] Professional light sidebar with animated galaxy background
+- [x] Profile page at `/profile` — view user info + edit credentials (name, email, phone)
+- [x] Profile link in sidebar (bottom links) and navbar dropdown
+- [x] Settings tabs restyled with pill/toggle buttons + icons (matching scheduled-report style)
+- [x] Dark mode prop scaffolded in Navbar and DataTable (no toggle UI yet)
+- [x] Responsive mobile layout — collapsible sidebar, responsive tables
+- [x] Loading skeletons (report-type cards, audit-logs table rows)
+- [x] Toast notifications for all CRUD operations — fallback text, no "undefined", no redundant "Error:" prefix (28+ hooks)
+- [x] Empty states with descriptive messages (scheduled-report completed/pending, audit-logs)
+- [x] FadeIn page animations (CSS, all major pages)
+- [x] Standardised shadcn theme tokens across all tables (`border-border`, `bg-card`, `text-foreground`, `hover:bg-muted/30`)
+- [x] All react-icons/fa replaced with lucide-react equivalents
+- [x] Consistent sheet widths (400px view / 480px form / 560px complex)
+- [ ] Error boundaries per page (React Error Boundary components)
+- [ ] Dark mode toggle (UI switch)
+- [ ] Avatar upload on profile page
 
 ## Phase 6: Finance & Insurance Features
 - [ ] PCI-DSS compliant data handling
-- [ ] SOX-compliant audit trails
-- [ ] Data retention policies
+- [x] SOX-compliant audit trails — `AuditLog` entity + global `AuditInterceptor` + paginated viewer
+- [ ] Data retention policies (auto-purge old audit logs)
 - [ ] Multi-tenant isolation
 - [ ] Role-based access control (RBAC) per report
 - [ ] Data masking for sensitive columns
@@ -66,15 +77,16 @@
 
 ## Phase 7: Performance & Scale
 - [ ] Database query result pagination
-- [ ] Async report execution (queued jobs)
+- [x] Async report execution (queued jobs via TasksModule)
 - [ ] WebSocket-based live query results
 - [ ] Connection pool per database type
 - [ ] Query plan analysis
 - [ ] Database indexing recommendations
 
 ## Phase 8: Documentation & DevOps
-- [ ] Architecture documentation (/arch)
+- [ ] Architecture documentation (`/arch`)
 - [ ] API documentation (Swagger/OpenAPI)
+- [ ] JSDoc / TSDoc comments on all new modules (audit-log backend + frontend, profile page)
 - [ ] Deployment guide (Docker)
 - [ ] CI/CD pipeline
 - [ ] Database migration strategy
@@ -84,4 +96,3 @@
 ## Legend
 - [x] = Done
 - [ ] = Pending
-- [ ] = Blocked

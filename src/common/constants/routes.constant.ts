@@ -8,6 +8,7 @@ export const ROUTES = {
   REPORT_TYPES: '/api/v1/report-types',
   TASKS: '/api/v1/tasks',
   DASHBOARD: '/api/v1/dashboard',
+  AUDIT: '/api/v1/audit-logs',
 } as const;
 
 export const ROUTE_PATHS = {

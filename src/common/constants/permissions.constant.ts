@@ -34,4 +34,7 @@ export const PERMISSIONS = [
   'user.delete',
   'user.update',
   'user.create',
+
+  'audit-log.view',
+  'audit-log.list',
 ] as const;
