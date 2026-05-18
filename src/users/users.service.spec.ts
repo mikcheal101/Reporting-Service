@@ -125,6 +125,18 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
       expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
         where: { username: 'test@test.com', isActive: true },
+        select: {
+          id: true,
+          username: true,
+          password: true,
+          firstName: true,
+          lastName: true,
+          middleName: true,
+          phoneNumber: true,
+          isActive: true,
+          permissions: true,
+          roles: true,
+        },
       });
     });
 

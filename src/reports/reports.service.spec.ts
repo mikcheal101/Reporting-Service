@@ -280,7 +280,7 @@ describe('ReportsService', () => {
       const result = await service.deleteAsync(1);
 
       expect(result).toBe(true);
-      expect(mockReportRepository.delete).toHaveBeenCalledWith(1);
+      expect(mockReportRepository.delete).toHaveBeenCalledWith({ id: 1 });
     });
 
     it('should propagate errors', async () => {

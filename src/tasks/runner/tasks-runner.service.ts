@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TaskStatus } from '../entity/task-status.enum';
 import { Task } from '../entity/task.entity';
 import { TasksStatusService } from '../status/tasks-status.service';
@@ -7,6 +7,7 @@ import { DatabaseFactory } from 'src/connections/database.factory';
 import { Connection } from 'src/connections/entity/connections.entity';
 import { CryptoService } from 'src/common/security/crypto/crypto.service';
 import { DatabaseUtils } from 'src/common/utils/database.utils';
+import { QueryValidatorUtils } from 'src/common/utils/query-validator.utils';
 import { ExporterFactory } from 'src/common/exporters/exporter.factory';
 import { IReportExporter } from 'src/common/exporters/ireport-exporter';
 import { MailService } from 'src/mail/mail.service';
@@ -162,6 +163,13 @@ export class TasksRunnerService {
     await adapter.connectAsync();
 
     this.logger.log(`${task.name} Running query`);
+
+    try {
+      QueryValidatorUtils.validateQuery(task.report.queryString);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+
     const dbResponse = await adapter.queryAsync(
       task.report.queryString,
       parameters,

@@ -21,6 +21,7 @@ export const ROUTE_PATHS = {
   SAVE_QUERY: 'save-query',
   AI_GENERATE_QUERY: 'ai-generate-query',
   REPORT_PARAMETERS: 'report-parameters',
+  CHANGE_PASSWORD: ':id/change-password',
   ASSIGN_ROLE: 'assign-role',
   ASSIGN_PERMISSION: 'assign-permission',
   TABLES: ':id/tables',

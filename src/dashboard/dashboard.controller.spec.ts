@@ -62,7 +62,9 @@ describe('DashboardController', () => {
         new Error('Metrics error'),
       );
 
-      await expect(controller.getMetricsAsync()).rejects.toThrow('Metrics error');
+      await expect(controller.getMetricsAsync()).rejects.toThrow(
+        'Metrics error',
+      );
     });
   });
 
@@ -72,7 +74,9 @@ describe('DashboardController', () => {
         { id: 'failure-1', title: 'High Failure', priority: 9 },
         { id: 'slow-1', title: 'Slow Query', priority: 8 },
       ];
-      mockDashboardAiService.getInsightsAsync.mockResolvedValue(expectedInsights);
+      mockDashboardAiService.getInsightsAsync.mockResolvedValue(
+        expectedInsights,
+      );
 
       const result = await controller.getInsightsAsync();
 

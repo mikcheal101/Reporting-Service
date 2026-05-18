@@ -26,10 +26,17 @@ describe('DashboardService', () => {
   let service: DashboardService;
 
   const mockReportRepository = { count: jest.fn() };
-  const mockTaskRepository = { count: jest.fn(), findOne: jest.fn(), createQueryBuilder: jest.fn() };
+  const mockTaskRepository = {
+    count: jest.fn(),
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
   const mockConnectionRepository = { count: jest.fn() };
   const mockUserRepository = { count: jest.fn() };
-  const mockReportTypeRepository = { count: jest.fn(), createQueryBuilder: jest.fn() };
+  const mockReportTypeRepository = {
+    count: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
 
   function setupEmptyTaskQBs() {
     mockTaskRepository.createQueryBuilder
@@ -50,15 +57,23 @@ describe('DashboardService', () => {
     mockReportTypeRepository.count.mockResolvedValue(0);
     mockTaskRepository.findOne.mockResolvedValue(null);
     mockTaskRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
-    mockReportTypeRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
+    mockReportTypeRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder([]),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DashboardService,
         { provide: getRepositoryToken(Report), useValue: mockReportRepository },
         { provide: getRepositoryToken(Task), useValue: mockTaskRepository },
-        { provide: getRepositoryToken(ReportType), useValue: mockReportTypeRepository },
-        { provide: getRepositoryToken(Connection), useValue: mockConnectionRepository },
+        {
+          provide: getRepositoryToken(ReportType),
+          useValue: mockReportTypeRepository,
+        },
+        {
+          provide: getRepositoryToken(Connection),
+          useValue: mockConnectionRepository,
+        },
         { provide: getRepositoryToken(User), useValue: mockUserRepository },
       ],
     }).compile();
@@ -78,12 +93,14 @@ describe('DashboardService', () => {
       mockReportTypeRepository.count.mockResolvedValue(3);
 
       mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([
-          { status: TaskStatus.COMPLETED, count: 50 },
-          { status: TaskStatus.FAILED, count: 10 },
-          { status: TaskStatus.RUNNING, count: 3 },
-          { status: TaskStatus.QUEUED, count: 2 },
-        ]))
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { status: TaskStatus.COMPLETED, count: 50 },
+            { status: TaskStatus.FAILED, count: 10 },
+            { status: TaskStatus.RUNNING, count: 3 },
+            { status: TaskStatus.QUEUED, count: 2 },
+          ]),
+        )
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
@@ -116,10 +133,12 @@ describe('DashboardService', () => {
 
     it('should return all expected fields in reportStats', async () => {
       mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([
-          { status: TaskStatus.COMPLETED, count: 50 },
-          { status: TaskStatus.FAILED, count: 10 },
-        ]))
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { status: TaskStatus.COMPLETED, count: 50 },
+            { status: TaskStatus.FAILED, count: 10 },
+          ]),
+        )
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
@@ -145,10 +164,12 @@ describe('DashboardService', () => {
 
     it('should compute correct success rate', async () => {
       mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([
-          { status: TaskStatus.COMPLETED, count: 40 },
-          { status: TaskStatus.FAILED, count: 10 },
-        ]))
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { status: TaskStatus.COMPLETED, count: 40 },
+            { status: TaskStatus.FAILED, count: 10 },
+          ]),
+        )
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
@@ -177,12 +198,14 @@ describe('DashboardService', () => {
   describe('reportsByStatus', () => {
     it('should count tasks by status correctly', async () => {
       mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([
-          { status: TaskStatus.COMPLETED, count: 50 },
-          { status: TaskStatus.FAILED, count: 5 },
-          { status: TaskStatus.RUNNING, count: 2 },
-          { status: TaskStatus.QUEUED, count: 3 },
-        ]))
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { status: TaskStatus.COMPLETED, count: 50 },
+            { status: TaskStatus.FAILED, count: 5 },
+            { status: TaskStatus.RUNNING, count: 2 },
+            { status: TaskStatus.QUEUED, count: 3 },
+          ]),
+        )
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
         .mockReturnValueOnce(mockQueryBuilder([]))
@@ -191,7 +214,9 @@ describe('DashboardService', () => {
       const result = await service.getMetricsAsync();
 
       expect(result.reportsByStatus).toHaveLength(4);
-      const completed = result.reportsByStatus.find((s) => s.status === 'Completed');
+      const completed = result.reportsByStatus.find(
+        (s) => s.status === 'Completed',
+      );
       expect(completed.count).toBe(50);
     });
   });

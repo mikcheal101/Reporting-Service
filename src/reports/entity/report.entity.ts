@@ -46,6 +46,9 @@ export class Report {
   @OneToOne(() => Task, (task) => task.report, { onDelete: 'CASCADE' })
   task: Task;
 
+  @Column({ nullable: true })
+  userId: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

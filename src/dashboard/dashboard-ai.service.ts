@@ -132,7 +132,8 @@ export class DashboardAiService {
 
     return result.map((r) => {
       const avgSecs = Math.round(Number(r.avgDuration));
-      const avgDisplay = avgSecs > 60 ? `${Math.round(avgSecs / 60)} min` : `${avgSecs} sec`;
+      const avgDisplay =
+        avgSecs > 60 ? `${Math.round(avgSecs / 60)} min` : `${avgSecs} sec`;
       return {
         id: `slow-${r.reportId}`,
         reportId: r.reportId,
@@ -212,7 +213,8 @@ export class DashboardAiService {
         'Review and verify each field mapping',
         'Add field-level validation rules',
       ],
-      impact: 'Proper field configuration ensures accurate data reporting and prevents data quality issues',
+      impact:
+        'Proper field configuration ensures accurate data reporting and prevents data quality issues',
       estimatedEffort: 'medium',
       priority: 6,
       createdAt: new Date().toISOString(),
@@ -260,7 +262,8 @@ export class DashboardAiService {
         'Consider removing unused connections to reduce complexity',
         'Or create new reports that leverage this data source',
       ],
-      impact: 'Cleaning up unused connections simplifies maintenance and reduces potential security surface area',
+      impact:
+        'Cleaning up unused connections simplifies maintenance and reduces potential security surface area',
       estimatedEffort: 'low',
       priority: 3,
       createdAt: new Date().toISOString(),
@@ -305,7 +308,8 @@ export class DashboardAiService {
         'Set up a regular review cadence for all reports',
         'Assign report owners for accountability',
       ],
-      impact: 'Regular report maintenance ensures decision-makers always have access to current, accurate information',
+      impact:
+        'Regular report maintenance ensures decision-makers always have access to current, accurate information',
       estimatedEffort: 'medium',
       priority: 5,
       createdAt: new Date().toISOString(),
@@ -348,7 +352,8 @@ export class DashboardAiService {
         'Set up automated periodic connection testing',
         'Configure alerts for connection failures',
       ],
-      impact: 'Failed connections can cause report execution failures and data gaps in critical reporting',
+      impact:
+        'Failed connections can cause report execution failures and data gaps in critical reporting',
       estimatedEffort: 'medium',
       priority: 10,
       createdAt: new Date().toISOString(),
@@ -395,7 +400,8 @@ export class DashboardAiService {
         'Configure email delivery for stakeholders',
         'Add monitoring for schedule adherence',
       ],
-      impact: 'Automating report execution ensures timely delivery and reduces manual effort',
+      impact:
+        'Automating report execution ensures timely delivery and reduces manual effort',
       estimatedEffort: 'low',
       priority: 4,
       createdAt: new Date().toISOString(),

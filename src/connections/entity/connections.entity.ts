@@ -41,6 +41,9 @@ export class Connection {
   @OneToMany(() => Report, (report) => report.connection)
   reports: Report[];
 
+  @Column({ nullable: true })
+  userId: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -73,6 +73,8 @@ describe('PermissionSeed', () => {
       'user.delete',
       'user.update',
       'user.create',
+      'audit-log.view',
+      'audit-log.list',
     ];
 
     mockFind.mockResolvedValue(allPermissions.map((name) => ({ name })));

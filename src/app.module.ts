@@ -25,10 +25,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 60,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 60,
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: false,
@@ -42,7 +44,9 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        synchronize: config.get<string>('DB_SYNC') === 'true',
+        synchronize: false,
+        migrationsRun: true,
+        migrations: ['dist/database/migrations/*.js'],
         autoLoadEntities: true,
         options: {
           encrypt: true,

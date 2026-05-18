@@ -12,7 +12,14 @@ import { User } from 'src/users/entity/users.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Report, ReportDetail, Task, ReportType, Connection, User]),
+    TypeOrmModule.forFeature([
+      Report,
+      ReportDetail,
+      Task,
+      ReportType,
+      Connection,
+      User,
+    ]),
   ],
   controllers: [DashboardController],
   providers: [DashboardService, DashboardAiService],

@@ -20,6 +20,7 @@ import { QueryParameter } from './entity/query-parameter.entity';
 import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.dto';
 import { IDatabaseAdapter } from 'src/connections/adapter/idatabase.adapter';
 import { ERRORS } from '../common/constants/error-messages.constant';
+import { QueryValidatorUtils } from '../common/utils/query-validator.utils';
 
 @Injectable()
 export class ReportsService {
@@ -39,6 +40,7 @@ export class ReportsService {
 
   public createReportAsync = async (
     createReportRequestDto: CreateReportRequestDto,
+    userId?: number,
   ): Promise<ReportDto> => {
     try {
       // check if report exists
@@ -56,6 +58,7 @@ export class ReportsService {
         description: createReportRequestDto.description,
         connection,
         reportType,
+        userId,
       });
 
       const createdReport = await this.reportRepository.save(report);
@@ -66,9 +69,11 @@ export class ReportsService {
     }
   };
 
-  public fetchAllAsync = async (): Promise<ReportDto[]> => {
+  public fetchAllAsync = async (userId?: number): Promise<ReportDto[]> => {
     try {
-      const reports = await this.reportRepository.find();
+      const reports = userId
+        ? await this.reportRepository.findBy({ userId })
+        : await this.reportRepository.find();
       const reportDtos: ReportDto[] = [];
       reports.forEach((report) => {
         reportDtos.push(this.reportUtils.convertToDto(report));
@@ -80,10 +85,15 @@ export class ReportsService {
     }
   };
 
-  public findOneAsync = async (id: number): Promise<ReportDto> => {
+  public findOneAsync = async (
+    id: number,
+    userId?: number,
+  ): Promise<ReportDto> => {
     try {
+      const where: any = { id };
+      if (userId) where.userId = userId;
       const report = await this.reportRepository.findOne({
-        where: { id },
+        where,
         relations: {
           connection: true,
           reportType: true,
@@ -97,9 +107,14 @@ export class ReportsService {
     }
   };
 
-  public deleteAsync = async (id: number): Promise<boolean> => {
+  public deleteAsync = async (
+    id: number,
+    userId?: number,
+  ): Promise<boolean> => {
     try {
-      await this.reportRepository.delete(id);
+      const where: any = { id };
+      if (userId) where.userId = userId;
+      await this.reportRepository.delete(where);
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -110,10 +125,13 @@ export class ReportsService {
   public updateAsync = async (
     id: number,
     updateReportRequestDto: UpdateReportRequestDto,
+    userId?: number,
   ): Promise<ReportDto> => {
     try {
       // get the report to update
-      const previous = await this.reportRepository.findOneBy({ id });
+      const where: any = { id };
+      if (userId) where.userId = userId;
+      const previous = await this.reportRepository.findOneBy(where);
       if (!previous) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
 
       if (updateReportRequestDto.name !== undefined) {
@@ -148,12 +166,13 @@ export class ReportsService {
 
   public getReportParametersAsync = async (
     id: number,
+    userId?: number,
   ): Promise<QueryParameter[]> => {
     try {
       // get the parameters by Report
-      return await this.queryParameterRepository.findBy({
-        report: { id },
-      });
+      const where: any = { report: { id } };
+      if (userId) where.report = { id, userId };
+      return await this.queryParameterRepository.findBy(where);
     } catch (error) {
       this.logger.error(error.message, error.stack);
       throw error;
@@ -162,16 +181,25 @@ export class ReportsService {
 
   public testQueryAsync = async (
     queryRequestDto: QueryRequestDto,
+    userId?: number,
   ): Promise<string | undefined> => {
     // get the report
+    const where: any = { id: Number.parseInt(queryRequestDto.reportId) };
+    if (userId) where.userId = userId;
     const report = await this.reportRepository.findOne({
-      where: { id: Number.parseInt(queryRequestDto.reportId) },
+      where,
       relations: {
         connection: true,
       },
     });
 
     if (!report) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
+
+    try {
+      QueryValidatorUtils.validateQuery(queryRequestDto.queryString);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
 
     const adapter: IDatabaseAdapter = DatabaseFactory.create({
       name: report.connection.name,
@@ -204,14 +232,21 @@ export class ReportsService {
 
   public saveQueryAsync = async (
     queryRequestDto: QueryRequestDto,
+    userId?: number,
   ): Promise<boolean> => {
     try {
       // get the report
-      const report = await this.reportRepository.findOneBy({
-        id: Number.parseInt(queryRequestDto.reportId),
-      });
+      const where: any = { id: Number.parseInt(queryRequestDto.reportId) };
+      if (userId) where.userId = userId;
+      const report = await this.reportRepository.findOneBy(where);
 
       if (!report) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
+
+      try {
+        QueryValidatorUtils.validateQuery(queryRequestDto.queryString);
+      } catch (error) {
+        throw new BadRequestException(error.message);
+      }
 
       // update the query with the new query string
       report.queryString = queryRequestDto.queryString;
@@ -242,11 +277,13 @@ export class ReportsService {
 
   public generateQueryViaAIAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
+    userId?: number,
   ): Promise<string> => {
     try {
       // get the query
       const aiPrompt = await this.generateAiPromptAsync(
         aiQueryGenerationRequestDto,
+        userId,
       );
 
       // send the prompt to the server
@@ -282,11 +319,14 @@ export class ReportsService {
 
   private readonly generateAiPromptAsync = async (
     aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
+    userId?: number,
   ): Promise<string> => {
     try {
       // fetch the report to get the databasetype
+      const where: any = { id: aiQueryGenerationRequestDto.reportId };
+      if (userId) where.userId = userId;
       const report = await this.reportRepository.findOne({
-        where: { id: aiQueryGenerationRequestDto.reportId },
+        where,
         relations: {
           connection: true,
         },
