@@ -45,11 +45,11 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Role, role => role.users)
+  @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles: Role[];
 
-  @ManyToMany(() => Permission, permission => permission.users)
+  @ManyToMany(() => Permission, (permission) => permission.users)
   @JoinTable()
   permissions: Permission[];
 }

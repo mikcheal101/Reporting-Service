@@ -12,7 +12,7 @@ export class PermissionsService {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionsRepository: Repository<Permission>,
-    private readonly permissionUtils: PermissionUtils
+    private readonly permissionUtils: PermissionUtils,
   ) {
     this.logger = new Logger(PermissionsService.name);
   }
@@ -25,5 +25,5 @@ export class PermissionsService {
       this.logger.error(error.message, error.stack);
       throw new Error(error.message);
     }
-  }
+  };
 }

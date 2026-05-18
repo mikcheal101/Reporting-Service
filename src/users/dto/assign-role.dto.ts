@@ -1,6 +1,6 @@
 // users/dto/assign-role.dto.ts
 
-import { IsArray, IsNumber } from "class-validator";
+import { IsArray, IsNumber } from 'class-validator';
 
 export default class AssignRoleDto {
   @IsNumber()
@@ -9,4 +9,4 @@ export default class AssignRoleDto {
   @IsArray()
   @IsNumber({}, { each: true })
   roleIds: Array<number>;
-};
+}

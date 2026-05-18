@@ -37,5 +37,5 @@ export class ReportTypeUtils {
       this.logger.error(error.message, error.stack);
       return undefined;
     }
-  }
+  };
 }

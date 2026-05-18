@@ -12,4 +12,4 @@ export default class CreateRoleDto {
   @ValidateNested({ each: true })
   @Type(() => PermissionRequestDto)
   permissions: PermissionRequestDto[];
-};
+}

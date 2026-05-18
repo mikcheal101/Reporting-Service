@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -17,9 +18,15 @@ import { RolesController } from './roles/roles.controller';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsController } from './permissions/permissions.controller';
 import { PermissionsModule } from './permissions/permissions.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 60,
+    }]),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: false,
@@ -27,7 +34,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: config.get<string>('DB_TYPE') as 'mssql',
+        type: 'mssql',
         host: config.get<string>('DB_HOST'),
         port: Number.parseInt(config.get<string>('DB_PORT'), 10),
         username: config.get<string>('DB_USERNAME'),
@@ -44,7 +51,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '3600s' },
+      signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
     CryptoModule,
     AuthModule,
@@ -56,8 +63,15 @@ import { PermissionsModule } from './permissions/permissions.module';
     MailModule,
     RolesModule,
     PermissionsModule,
+    DashboardModule,
   ],
   controllers: [AppController, RolesController, PermissionsController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

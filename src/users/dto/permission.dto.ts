@@ -8,7 +8,7 @@ export default class PermissionDto {
 
   @IsString()
   name: string;
-  
+
   @IsDateString()
   createdAt: Date;
 }

@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Report } from './entity/report.entity';
 import { Repository } from 'typeorm';
@@ -13,6 +19,7 @@ import { DatabaseUtils } from 'src/common/utils/database.utils';
 import { QueryParameter } from './entity/query-parameter.entity';
 import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.dto';
 import { IDatabaseAdapter } from 'src/connections/adapter/idatabase.adapter';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class ReportsService {
@@ -55,7 +62,7 @@ export class ReportsService {
       return this.reportUtils.convertToDto(createdReport);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -69,7 +76,7 @@ export class ReportsService {
       return reportDtos;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -86,7 +93,7 @@ export class ReportsService {
       return this.reportUtils.convertToDto(report);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -96,7 +103,7 @@ export class ReportsService {
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -107,7 +114,7 @@ export class ReportsService {
     try {
       // get the report to update
       const previous = await this.reportRepository.findOneBy({ id });
-      if (!previous) throw new Error('Invalid Report ID!');
+      if (!previous) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
 
       if (updateReportRequestDto.name !== undefined) {
         previous.name = updateReportRequestDto.name;
@@ -135,7 +142,7 @@ export class ReportsService {
       return this.reportUtils.convertToDto(updatedReport);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -149,7 +156,7 @@ export class ReportsService {
       });
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -164,7 +171,7 @@ export class ReportsService {
       },
     });
 
-    if (!report) throw new Error('Report not found!');
+    if (!report) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
 
     const adapter: IDatabaseAdapter = DatabaseFactory.create({
       name: report.connection.name,
@@ -204,7 +211,7 @@ export class ReportsService {
         id: Number.parseInt(queryRequestDto.reportId),
       });
 
-      if (!report) throw new Error('Report not found!');
+      if (!report) throw new NotFoundException(ERRORS.REPORT_NOT_FOUND);
 
       // update the query with the new query string
       report.queryString = queryRequestDto.queryString;
@@ -229,7 +236,7 @@ export class ReportsService {
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -260,7 +267,7 @@ export class ReportsService {
       });
 
       if (!ollamaResponse.ok) {
-        throw new Error('Failed to generate query via AI!');
+        throw new BadGatewayException(ERRORS.AI_QUERY_GENERATION_FAILED);
       }
 
       const data = await ollamaResponse.json();
@@ -269,7 +276,7 @@ export class ReportsService {
       return apiResponse;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -285,11 +292,10 @@ export class ReportsService {
         },
       });
 
-      if (!report) throw new Error('No report found for this query!');
+      if (!report)
+        throw new NotFoundException(ERRORS.NO_REPORT_FOUND_FOR_QUERY);
       if (!report.connection) {
-        throw new Error(
-          'No connection defined for the report found for this query!',
-        );
+        throw new BadRequestException(ERRORS.NO_CONNECTION_DEFINED);
       }
 
       const formattedText = aiQueryGenerationRequestDto.schemas
@@ -325,7 +331,7 @@ export class ReportsService {
         SQL Query:`.trim();
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 }

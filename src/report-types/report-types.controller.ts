@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -14,8 +15,9 @@ import { ReportTypesService } from './report-types.service';
 import { CreateReportTypeRequestDto } from './dto/create-report-type.request.dto';
 import { UpdateReportTypeRequestDto } from './dto/update-report-type.request.dto';
 import { ReportTypeDto } from './dto/report-type.dto';
+import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@Controller('/api/v1/report-types')
+@Controller(ROUTES.REPORT_TYPES)
 export class ReportTypesController {
   constructor(private readonly reportTypeService: ReportTypesService) {}
 
@@ -25,16 +27,18 @@ export class ReportTypesController {
     try {
       return await this.reportTypeService.fetchAllAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(ROUTE_PATHS.ID)
   public async getReportType(@Param('id') id: string): Promise<ReportTypeDto> {
     try {
       return await this.reportTypeService.fetchOneAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
@@ -68,12 +72,13 @@ export class ReportTypesController {
         emails,
       });
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put(':id')
+  @Put(ROUTE_PATHS.ID)
   public async updateReportType(
     @Param('id') id: string,
     @Body() updateReportTypeRequestDto: UpdateReportTypeRequestDto,
@@ -104,16 +109,18 @@ export class ReportTypesController {
         updateReportTypeRequestDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(ROUTE_PATHS.ID)
   public async deleteReportType(@Param('id') id: string): Promise<boolean> {
     try {
       return await this.reportTypeService.deleteAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }

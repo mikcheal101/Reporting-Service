@@ -1,14 +1,15 @@
 // database/seeds/seed.ts
 
-import { INestApplicationContext, Logger } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "src/app.module";
-import { PermissionSeed } from "./permission.seed";
-import { RoleSeed } from "./role.seed";
-import { UserSeed } from "./user.seed";
+import { INestApplicationContext, Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from 'src/app.module';
+import { PermissionSeed } from './permission.seed';
+import { RoleSeed } from './role.seed';
+import { UserSeed } from './user.seed';
 
 const bootstrap = async () => {
-  const applicationContext: INestApplicationContext = await NestFactory.createApplicationContext(AppModule);
+  const applicationContext: INestApplicationContext =
+    await NestFactory.createApplicationContext(AppModule);
 
   await PermissionSeed.run(applicationContext);
   await RoleSeed.run(applicationContext);

@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entity/task.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +13,7 @@ import { ReportDto } from 'src/reports/dto/report.dto';
 import { TaskStatus } from './entity/task-status.enum';
 import { CronUtil } from 'src/common/utils/cron.utils';
 import { FileFormatFactory } from 'src/common/utils/file-format.factory';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class TasksService {
@@ -54,9 +60,9 @@ export class TasksService {
       });
 
       if (exists) {
-        const errorMessage: string = `Report already scheduled with id: ${exists.id}!`;
+        const errorMessage: string = ERRORS.REPORT_ALREADY_SCHEDULED(exists.id);
         this.logger.warn(errorMessage);
-        throw new Error(errorMessage);
+        throw new ConflictException(errorMessage);
       }
 
       if (scheduleTaskRequestDto.generateNow) {
@@ -68,7 +74,7 @@ export class TasksService {
       }
     } catch (error) {
       this.logger.error(error.message);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -87,7 +93,7 @@ export class TasksService {
       });
     } catch (error) {
       this.logger.error(error.message, error);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -106,7 +112,7 @@ export class TasksService {
       });
     } catch (error) {
       this.logger.error(error.message, error);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -128,12 +134,12 @@ export class TasksService {
 
       if (!task) {
         this.logger.error(`Task not found with id: ${id}`);
-        throw new Error('Task not found!');
+        throw new NotFoundException(ERRORS.TASK_NOT_FOUND);
       }
 
       if (!task.report) {
         this.logger.error(`Task Report not found with task id: ${id}`);
-        throw new Error('Task Report not found!');
+        throw new NotFoundException(ERRORS.TASK_REPORT_NOT_FOUND);
       }
 
       const fileExtension: string = FileFormatFactory.create(
@@ -143,7 +149,7 @@ export class TasksService {
       return filename;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -156,8 +162,8 @@ export class TasksService {
     );
 
     if (!report) {
-      throw new Error(
-        `Report with id: ${scheduleTaskRequestDto.reportId} not found!`,
+      throw new NotFoundException(
+        ERRORS.REPORT_WITH_ID_NOT_FOUND(scheduleTaskRequestDto.reportId),
       );
     }
 

@@ -24,10 +24,10 @@ export class Role {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Permission, permission => permission.roles)
+  @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable()
   permissions: Permission[];
 
-  @ManyToMany(() => User, user => user.roles)
+  @ManyToMany(() => User, (user) => user.roles)
   users: User[];
 }

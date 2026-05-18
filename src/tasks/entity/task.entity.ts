@@ -34,6 +34,12 @@ export class Task {
   @Column({ nullable: true })
   payload: string;
 
+  @Column({ nullable: true })
+  duration: number;
+
+  @Column({ nullable: true })
+  executedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

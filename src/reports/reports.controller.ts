@@ -6,6 +6,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Logger,
   Param,
@@ -22,8 +23,9 @@ import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.d
 import DatabaseTimeOutError from 'src/common/errors/databasetimeout.error';
 import DatabaseDeadLockError from 'src/common/errors/databasedeadlock.error';
 import { Response } from 'express';
+import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@Controller('/api/v1/reports')
+@Controller(ROUTES.REPORTS)
 export class ReportsController {
   private readonly logger: Logger;
 
@@ -41,6 +43,7 @@ export class ReportsController {
         createReportRequestDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadGatewayException(error.message);
     }
   }
@@ -51,11 +54,12 @@ export class ReportsController {
     try {
       return await this.reportsService.fetchAllAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
-  @Post('test-query')
+  @Post(ROUTE_PATHS.TEST_QUERY)
   public async testQuery(
     @Body() queryRequestDto: QueryRequestDto,
     @Res() response: Response,
@@ -72,24 +76,26 @@ export class ReportsController {
       ) {
         return response.status(HttpStatus.ACCEPTED).json(error?.message);
       }
+      if (error instanceof HttpException) throw error;
       return response.status(HttpStatus.BAD_REQUEST).json(error?.message);
     }
   }
 
   @HttpCode(HttpStatus.CREATED)
-  @Post('save-query')
+  @Post(ROUTE_PATHS.SAVE_QUERY)
   public async saveQuery(
     @Body() queryRequestDto: QueryRequestDto,
   ): Promise<boolean> {
     try {
       return await this.reportsService.saveQueryAsync(queryRequestDto);
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('ai-generate-query')
+  @Post(ROUTE_PATHS.AI_GENERATE_QUERY)
   public async generateQueryViaAI(
     @Body() aiQueryGenerationRequestDto: AiQueryGenerationRequestDto,
   ): Promise<string | undefined> {
@@ -98,32 +104,35 @@ export class ReportsController {
         aiQueryGenerationRequestDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('report-parameters/:id')
+  @Get(ROUTE_PATHS.REPORT_PARAMETERS)
   public async getReportParameters(@Param('id') id: string): Promise<any> {
     try {
       return this.reportsService.getReportParametersAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(ROUTE_PATHS.ID)
   public async getReport(@Param('id') id: string): Promise<ReportDto> {
     try {
       return await this.reportsService.findOneAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put(':id')
+  @Put(ROUTE_PATHS.ID)
   public async updateReport(
     @Param('id') id: string,
     @Body() updateReportRequestDto: UpdateReportRequestDto,
@@ -134,16 +143,18 @@ export class ReportsController {
         updateReportRequestDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(ROUTE_PATHS.ID)
   public async deleteReport(@Param('id') id: string): Promise<boolean> {
     try {
       return await this.reportsService.deleteAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }

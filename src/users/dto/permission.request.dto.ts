@@ -6,6 +6,6 @@ export default class PermissionRequestDto {
   @IsNumber()
   id: number;
 
-  name: string;  
+  name: string;
   createdAt: Date;
 }

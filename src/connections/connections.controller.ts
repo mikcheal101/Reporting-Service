@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -14,13 +15,14 @@ import { ConnectionsService } from './connections.service';
 import { CreateConnectionRequestDto } from './dto/create-connection.request.dto';
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
+import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@Controller('/api/v1/connections')
+@Controller(ROUTES.CONNECTIONS)
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post('/test-connection')
+  @Post(ROUTE_PATHS.TEST_CONNECTION)
   public async testConnection(
     @Body() testConnectionDto: TestConnectionRequestDto,
   ) {
@@ -29,6 +31,7 @@ export class ConnectionsController {
         testConnectionDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
@@ -39,6 +42,7 @@ export class ConnectionsController {
     try {
       return await this.connectionsService.connectionsAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
@@ -53,12 +57,13 @@ export class ConnectionsController {
         createConnectionDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put(':id')
+  @Put(ROUTE_PATHS.ID)
   public async updateConnection(
     @Param('id') id: string,
     @Body() updateConnectionDto: UpdateConnectionRequestDto,
@@ -69,40 +74,44 @@ export class ConnectionsController {
         updateConnectionDto,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(ROUTE_PATHS.ID)
   public async getConnection(@Param('id') id: string) {
     try {
       return await this.connectionsService.getDecryptedConnectionAsync(
         Number.parseInt(id),
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id/tables')
+  @Get(ROUTE_PATHS.TABLES)
   public async getConnectionTables(@Param('id') id: string) {
     try {
       return this.connectionsService.getConnectionTablesAsync(
         Number.parseInt(id),
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(ROUTE_PATHS.ID)
   public async deleteConnection(@Param('id') id: string) {
     try {
       return await this.connectionsService.removeConnectionAsync(id);
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
