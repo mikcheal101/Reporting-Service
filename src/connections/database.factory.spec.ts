@@ -42,7 +42,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.MySQL,
       });
       expect(adapter).toBeInstanceOf(MysqlAdapter);
-      expect(MysqlAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.MySQL }));
+      expect(MysqlAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.MySQL }),
+      );
     });
 
     it('should create PostgresqlAdapter for PostgreSQL', () => {
@@ -51,7 +53,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.PostgreSQL,
       });
       expect(adapter).toBeInstanceOf(PostgresqlAdapter);
-      expect(PostgresqlAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.PostgreSQL }));
+      expect(PostgresqlAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.PostgreSQL }),
+      );
     });
 
     it('should create MariaDBAdapter for MariaDB', () => {
@@ -60,7 +64,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.MariaDB,
       });
       expect(adapter).toBeInstanceOf(MariaDBAdapter);
-      expect(MariaDBAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.MariaDB }));
+      expect(MariaDBAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.MariaDB }),
+      );
     });
 
     it('should create OracleAdapter for Oracle', () => {
@@ -69,7 +75,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.Oracle,
       });
       expect(adapter).toBeInstanceOf(OracleAdapter);
-      expect(OracleAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.Oracle }));
+      expect(OracleAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.Oracle }),
+      );
     });
 
     it('should create IbmDb2Adapter for IBMDb2', () => {
@@ -78,7 +86,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.IBMDb2,
       });
       expect(adapter).toBeInstanceOf(IbmDb2Adapter);
-      expect(IbmDb2Adapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.IBMDb2 }));
+      expect(IbmDb2Adapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.IBMDb2 }),
+      );
     });
 
     it('should create FirebirdAdapter for Firebird', () => {
@@ -87,7 +97,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.Firebird,
       });
       expect(adapter).toBeInstanceOf(FirebirdAdapter);
-      expect(FirebirdAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.Firebird }));
+      expect(FirebirdAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.Firebird }),
+      );
     });
 
     it('should create H2DatabaseAdapter for H2Database', () => {
@@ -96,7 +108,9 @@ describe('DatabaseFactory', () => {
         databaseType: DatabaseType.H2Database,
       });
       expect(adapter).toBeInstanceOf(H2DatabaseAdapter);
-      expect(H2DatabaseAdapter).toHaveBeenCalledWith(expect.objectContaining({ databaseType: DatabaseType.H2Database }));
+      expect(H2DatabaseAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ databaseType: DatabaseType.H2Database }),
+      );
     });
 
     it('should throw for unsupported database type', () => {

@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/users.entity';
@@ -60,6 +61,18 @@ export class UsersService {
       where: {
         username,
         isActive: true,
+      },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        firstName: true,
+        lastName: true,
+        middleName: true,
+        phoneNumber: true,
+        isActive: true,
+        permissions: true,
+        roles: true,
       },
     });
   };
@@ -169,6 +182,41 @@ export class UsersService {
       }
 
       await this.usersRepository.delete(id);
+
+      return true;
+    } catch (error) {
+      this.logger.error(error.message, error.stack);
+      throw error;
+    }
+  };
+
+  public changePasswordAsync = async (
+    id: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<boolean> => {
+    try {
+      const user: User = await this.usersRepository
+        .createQueryBuilder('user')
+        .addSelect('user.password')
+        .where('user.id = :id', { id })
+        .andWhere('user.isActive = :isActive', { isActive: true })
+        .getOne();
+
+      if (!user) throw new NotFoundException(ERRORS.USER_NOT_FOUND);
+
+      const isMatched: boolean = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+      if (!isMatched)
+        throw new UnauthorizedException('Current password is incorrect');
+
+      const hashedPassword: string = await bcrypt.hash(
+        newPassword,
+        Number(process.env.HASHING_ROUNDS),
+      );
+      await this.usersRepository.update(id, { password: hashedPassword });
 
       return true;
     } catch (error) {

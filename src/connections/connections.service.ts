@@ -44,9 +44,11 @@ export class ConnectionsService {
     }
   };
 
-  public connectionsAsync = async (): Promise<Connection[]> => {
+  public connectionsAsync = async (userId?: number): Promise<Connection[]> => {
     try {
-      let conns = await this.connectionsRepository.find();
+      let conns = userId
+        ? await this.connectionsRepository.findBy({ userId })
+        : await this.connectionsRepository.find();
       conns = conns.map((connection) => {
         connection.password = this.cryptoService.decrypt(connection.password);
         return connection;
@@ -60,6 +62,7 @@ export class ConnectionsService {
 
   public createConnectionAsync = async (
     connection: CreateConnectionRequestDto,
+    userId?: number,
   ): Promise<ConnectionDto> => {
     try {
       const exists = await this.connectionsRepository.findOneBy({
@@ -80,6 +83,7 @@ export class ConnectionsService {
         database: connection.database,
         databaseType: connection.databaseType,
         isTestSuccessful: connection.isTestSuccessful,
+        userId,
       });
 
       const savedConnection =
@@ -95,11 +99,12 @@ export class ConnectionsService {
   public updateConnectionAsync = async (
     id: string,
     conn: UpdateConnectionRequestDto,
+    userId?: number,
   ): Promise<ConnectionDto> => {
     try {
-      const connection = await this.connectionsRepository.findOneBy({
-        id: Number.parseInt(id),
-      });
+      const where: any = { id: Number.parseInt(id) };
+      if (userId) where.userId = userId;
+      const connection = await this.connectionsRepository.findOneBy(where);
       if (!connection) {
         throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
       }
@@ -121,11 +126,14 @@ export class ConnectionsService {
     }
   };
 
-  public getOneConnectionAsync = async (id: string): Promise<Connection> => {
+  public getOneConnectionAsync = async (
+    id: string,
+    userId?: number,
+  ): Promise<Connection> => {
     try {
-      const connection = await this.connectionsRepository.findOneBy({
-        id: Number.parseInt(id),
-      });
+      const where: any = { id: Number.parseInt(id) };
+      if (userId) where.userId = userId;
+      const connection = await this.connectionsRepository.findOneBy(where);
       return connection;
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -135,11 +143,12 @@ export class ConnectionsService {
 
   public getDecryptedConnectionAsync = async (
     id: number,
+    userId?: number,
   ): Promise<Connection> => {
     try {
-      const connection = await this.connectionsRepository.findOneBy({
-        id: id,
-      });
+      const where: any = { id: id };
+      if (userId) where.userId = userId;
+      const connection = await this.connectionsRepository.findOneBy(where);
       if (connection) {
         connection.password = this.cryptoService.decrypt(connection.password);
       }
@@ -150,11 +159,14 @@ export class ConnectionsService {
     }
   };
 
-  public removeConnectionAsync = async (id: string): Promise<boolean> => {
+  public removeConnectionAsync = async (
+    id: string,
+    userId?: number,
+  ): Promise<boolean> => {
     try {
-      const deleted = await this.connectionsRepository.delete({
-        id: Number.parseInt(id),
-      });
+      const where: any = { id: Number.parseInt(id) };
+      if (userId) where.userId = userId;
+      const deleted = await this.connectionsRepository.delete(where);
       return deleted.affected > 0;
     } catch (error) {
       this.logger.error(error.message, error.stack);
@@ -164,9 +176,12 @@ export class ConnectionsService {
 
   public getConnectionTablesAsync = async (
     id: number,
+    userId?: number,
   ): Promise<ConnectionTablesResponseDto[]> => {
     // get the connection and its details
-    const connection = await this.connectionsRepository.findOneBy({ id });
+    const where: any = { id };
+    if (userId) where.userId = userId;
+    const connection = await this.connectionsRepository.findOneBy(where);
 
     if (!connection) throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
 

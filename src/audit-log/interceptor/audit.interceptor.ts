@@ -66,8 +66,7 @@ export class AuditInterceptor implements NestInterceptor {
             entityId: request.params?.id
               ? Number(request.params.id)
               : undefined,
-            newValues:
-              method !== 'DELETE' ? request.body : undefined,
+            newValues: method !== 'DELETE' ? request.body : undefined,
             ipAddress: request.ip,
           });
         } catch (error) {

@@ -17,6 +17,7 @@ import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
 import AssignRoleDto from './dto/assign-role.dto';
 import AssignPermissionDto from './dto/assign-permission.dto';
+import ChangePasswordDto from './dto/change-password.dto';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
 @Controller(ROUTES.USERS)
@@ -91,6 +92,24 @@ export class UsersController {
   public async deleteUser(@Param('id') id: string): Promise<boolean> {
     try {
       return await this.usersService.deleteUserAsync(Number.parseInt(id));
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(ROUTE_PATHS.CHANGE_PASSWORD)
+  public async changePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<boolean> {
+    try {
+      return await this.usersService.changePasswordAsync(
+        Number.parseInt(id),
+        changePasswordDto.currentPassword,
+        changePasswordDto.newPassword,
+      );
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);

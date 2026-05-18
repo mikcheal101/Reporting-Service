@@ -43,8 +43,12 @@ describe('DashboardAiService', () => {
     jest.clearAllMocks();
 
     mockTaskRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
-    mockReportRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
-    mockConnectionRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
+    mockReportRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder([]),
+    );
+    mockConnectionRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder([]),
+    );
     mockReportRepository.find.mockResolvedValue([]);
     mockConnectionRepository.find.mockResolvedValue([]);
 
@@ -54,7 +58,10 @@ describe('DashboardAiService', () => {
         { provide: getRepositoryToken(Report), useValue: mockReportRepository },
         { provide: getRepositoryToken(Task), useValue: mockTaskRepository },
         { provide: getRepositoryToken(ReportDetail), useValue: {} },
-        { provide: getRepositoryToken(Connection), useValue: mockConnectionRepository },
+        {
+          provide: getRepositoryToken(Connection),
+          useValue: mockConnectionRepository,
+        },
         { provide: getRepositoryToken(ReportType), useValue: {} },
       ],
     }).compile();
@@ -69,18 +76,35 @@ describe('DashboardAiService', () => {
   describe('getInsightsAsync', () => {
     it('should return combined insights sorted by priority descending', async () => {
       mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 1, reportName: 'Fail Rpt', total: 10, failures: 5 }]))
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 2, reportName: 'Slow Rpt', avgDuration: 150 }]));
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { reportId: 1, reportName: 'Fail Rpt', total: 10, failures: 5 },
+          ]),
+        )
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { reportId: 2, reportName: 'Slow Rpt', avgDuration: 150 },
+          ]),
+        );
 
       mockReportRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 3, reportName: 'No Details' }]))
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 4, reportName: 'No Task' }]));
+        .mockReturnValueOnce(
+          mockQueryBuilder([{ reportId: 3, reportName: 'No Details' }]),
+        )
+        .mockReturnValueOnce(
+          mockQueryBuilder([{ reportId: 4, reportName: 'No Task' }]),
+        );
 
-      mockConnectionRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 5, reportName: 'Unused Conn' }]));
+      mockConnectionRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([{ reportId: 5, reportName: 'Unused Conn' }]),
+      );
 
       mockReportRepository.find.mockResolvedValue([
-        { id: 6, name: 'Stale Rpt', updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
+        {
+          id: 6,
+          name: 'Stale Rpt',
+          updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+        },
       ]);
 
       mockConnectionRepository.find.mockResolvedValue([
@@ -91,7 +115,9 @@ describe('DashboardAiService', () => {
 
       expect(insights).toHaveLength(7);
       for (let i = 1; i < insights.length; i++) {
-        expect(insights[i - 1].priority).toBeGreaterThanOrEqual(insights[i].priority);
+        expect(insights[i - 1].priority).toBeGreaterThanOrEqual(
+          insights[i].priority,
+        );
       }
     });
 
@@ -121,8 +147,11 @@ describe('DashboardAiService', () => {
 
   describe('getHighFailureReportsAsync', () => {
     it('should map failure data with critical severity when rate > 30%', async () => {
-      mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 1, reportName: 'Bad Report', total: 10, failures: 5 }]));
+      mockTaskRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([
+          { reportId: 1, reportName: 'Bad Report', total: 10, failures: 5 },
+        ]),
+      );
 
       const result = await service.getInsightsAsync();
       const insight = result.find((i) => i.id === 'failure-1');
@@ -134,8 +163,11 @@ describe('DashboardAiService', () => {
     });
 
     it('should set high severity when rate 16-30%', async () => {
-      mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 2, reportName: 'Med Report', total: 20, failures: 4 }]));
+      mockTaskRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([
+          { reportId: 2, reportName: 'Med Report', total: 20, failures: 4 },
+        ]),
+      );
 
       const result = await service.getInsightsAsync();
       const insight = result.find((i) => i.id === 'failure-2');
@@ -146,8 +178,11 @@ describe('DashboardAiService', () => {
     });
 
     it('should set medium severity when rate <= 15%', async () => {
-      mockTaskRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 3, reportName: 'Low Report', total: 100, failures: 10 }]));
+      mockTaskRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([
+          { reportId: 3, reportName: 'Low Report', total: 100, failures: 10 },
+        ]),
+      );
 
       const result = await service.getInsightsAsync();
       const insight = result.find((i) => i.id === 'failure-3');
@@ -162,7 +197,11 @@ describe('DashboardAiService', () => {
     it('should map slow reports with severity based on avg duration', async () => {
       mockTaskRepository.createQueryBuilder
         .mockReturnValueOnce(mockQueryBuilder([]))
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 1, reportName: 'Slow Rpt', avgDuration: 200 }]));
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { reportId: 1, reportName: 'Slow Rpt', avgDuration: 200 },
+          ]),
+        );
 
       const insights = await service.getInsightsAsync();
       const insight = insights.find((i) => i.id === 'slow-1');
@@ -176,7 +215,11 @@ describe('DashboardAiService', () => {
     it('should format duration in seconds when under 60', async () => {
       mockTaskRepository.createQueryBuilder
         .mockReturnValueOnce(mockQueryBuilder([]))
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 2, reportName: 'Fast Rpt', avgDuration: 30 }]));
+        .mockReturnValueOnce(
+          mockQueryBuilder([
+            { reportId: 2, reportName: 'Fast Rpt', avgDuration: 30 },
+          ]),
+        );
 
       const insights = await service.getInsightsAsync();
       const insight = insights.find((i) => i.id === 'slow-2');
@@ -189,8 +232,9 @@ describe('DashboardAiService', () => {
 
   describe('getReportsMissingDetailsAsync', () => {
     it('should generate insight for reports with no field definitions', async () => {
-      mockReportRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 10, reportName: 'No Fields' }]));
+      mockReportRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([{ reportId: 10, reportName: 'No Fields' }]),
+      );
 
       const insights = await service.getInsightsAsync();
       const insight = insights.find((i) => i.id === 'details-10');
@@ -205,8 +249,9 @@ describe('DashboardAiService', () => {
 
   describe('getUnusedConnectionsAsync', () => {
     it('should generate insight for unused connections', async () => {
-      mockConnectionRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 20, reportName: 'Ghost Conn' }]));
+      mockConnectionRepository.createQueryBuilder.mockReturnValueOnce(
+        mockQueryBuilder([{ reportId: 20, reportName: 'Ghost Conn' }]),
+      );
 
       const insights = await service.getInsightsAsync();
       const insight = insights.find((i) => i.id === 'unused-20');
@@ -221,7 +266,11 @@ describe('DashboardAiService', () => {
   describe('getStaleReportsAsync', () => {
     it('should generate insight for stale reports', async () => {
       mockReportRepository.find.mockResolvedValue([
-        { id: 30, name: 'Old Report', updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
+        {
+          id: 30,
+          name: 'Old Report',
+          updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+        },
       ]);
 
       const insights = await service.getInsightsAsync();
@@ -237,7 +286,11 @@ describe('DashboardAiService', () => {
       await service.getInsightsAsync();
 
       expect(mockReportRepository.find).toHaveBeenCalledWith({
-        where: { updatedAt: expect.objectContaining({ '@instanceof': expect.anything() }) },
+        where: {
+          updatedAt: expect.objectContaining({
+            '@instanceof': expect.anything(),
+          }),
+        },
         order: { updatedAt: 'ASC' },
         take: 3,
       });
@@ -273,7 +326,9 @@ describe('DashboardAiService', () => {
     it('should generate insight for unscheduled reports', async () => {
       mockReportRepository.createQueryBuilder
         .mockReturnValueOnce(mockQueryBuilder([]))
-        .mockReturnValueOnce(mockQueryBuilder([{ reportId: 50, reportName: 'Manual Rpt' }]));
+        .mockReturnValueOnce(
+          mockQueryBuilder([{ reportId: 50, reportName: 'Manual Rpt' }]),
+        );
 
       const insights = await service.getInsightsAsync();
       const insight = insights.find((i) => i.id === 'no-task-50');

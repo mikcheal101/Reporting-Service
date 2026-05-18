@@ -15,15 +15,16 @@
 - [x] Rate limiting (60 req/min)
 - [x] Input validation (ValidationPipe)
 - [x] CORS hardening
-- [ ] Encrypt connection credentials at rest (AES-256)
+- [x] Encrypt connection credentials at rest (AES-256) — `ENCRYPTION_KEY` in .env, CryptoService exists
 - [x] SOX-compliant audit logging — global AuditInterceptor auto-logs all POST/PUT/PATCH/DELETE across every entity
 - [x] Audit log viewer UI at `/settings/audit-logs` with entity/action/date filters and pagination
 - [x] Audit permissions (`audit-log.view`, `audit-log.list`) added to seed
-- [ ] Row-level security policies
-- [ ] SQL injection prevention audit
-- [ ] Secrets management (env-based, not hardcoded JWT)
-- [ ] Replace `synchronize: true` with TypeORM migrations
-- [ ] Password change endpoint (backend)
+- [x] Row-level security — `userId` column on Connection/Report entities, services filter by `request.user.id`
+- [x] SQL injection prevention — `QueryValidatorUtils` blocks DROP/DELETE/INSERT/UPDATE/ALTER/TRUNCATE/CREATE/EXEC/UNION/WAITFOR
+- [x] Secrets management — JWT secret moved to `.env` (no longer hardcoded)
+- [x] TypeORM migrations — `synchronize: false`, `migrationsRun: true`, `src/database/migrations/InitialSchema.ts` generated
+- [x] Password change endpoint — `POST /api/v1/users/:id/change-password` with bcrypt + DTO validation
+- [x] `.env.example` created for both backend and frontend documenting all required vars
 
 ## Phase 3: Observability & Reliability
 - [ ] Health check endpoint (`GET /api/v1/health`)

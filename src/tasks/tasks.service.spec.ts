@@ -52,7 +52,7 @@ describe('TasksService', () => {
     queryString: null,
   };
 
-    const mockTask: Task = {
+  const mockTask: Task = {
     id: 1,
     name: 'task-Test Report',
     report: { id: 1, name: 'Test Report' } as any,
