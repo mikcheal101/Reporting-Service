@@ -1,4 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/users.entity';
 import { In, Repository } from 'typeorm';
@@ -7,6 +13,7 @@ import { UserUtils } from 'src/common/utils/user.utils';
 import { UserResponseDto } from './dto/user-response.dto';
 import { Role } from './entity/roles.entity';
 import { Permission } from './entity/permissions.entity';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class UsersService {
@@ -36,26 +43,26 @@ export class UsersService {
             permissions: true,
           },
           permissions: true,
-        }
+        },
       });
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException(ERRORS.USER_NOT_FOUND);
       }
       return user;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public findOneAsync = async (username: string): Promise<User | null> => {
     return this.usersRepository.findOne({
       where: {
         username,
         isActive: true,
-      }
+      },
     });
-  }
+  };
 
   public findAsync = async (): Promise<UserResponseDto[]> => {
     try {
@@ -68,14 +75,14 @@ export class UsersService {
             permissions: true,
           },
           permissions: true,
-        }
+        },
       });
       return users.map(this.userUtils.mapUserToUserResponseDto);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public findOneByIdAsync = async (id: number): Promise<UserResponseDto> => {
     try {
@@ -83,9 +90,9 @@ export class UsersService {
       return this.userUtils.mapUserToUserResponseDto(user);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public createUserAsync = async (
     username: string,
@@ -102,7 +109,10 @@ export class UsersService {
         return this.userUtils.mapUserToUserResponseDto(existingUser);
       }
 
-      const hashedPassword: string = await bcrypt.hash(password, Number(process.env.HASHING_ROUNDS));
+      const hashedPassword: string = await bcrypt.hash(
+        password,
+        Number(process.env.HASHING_ROUNDS),
+      );
 
       const user: User = this.usersRepository.create({
         username,
@@ -118,9 +128,9 @@ export class UsersService {
       return this.userUtils.mapUserToUserResponseDto(createdUser);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public updateUserAsync = async (
     id: number,
@@ -133,7 +143,7 @@ export class UsersService {
     try {
       const user: User = await this.findUserByIdAsync(id);
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException(ERRORS.USER_NOT_FOUND);
       }
 
       user.username = username;
@@ -147,15 +157,15 @@ export class UsersService {
       return this.userUtils.mapUserToUserResponseDto(updatedUser);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public deleteUserAsync = async (id: number): Promise<boolean> => {
     try {
       const user: User = await this.findUserByIdAsync(id);
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException(ERRORS.USER_NOT_FOUND);
       }
 
       await this.usersRepository.delete(id);
@@ -163,15 +173,18 @@ export class UsersService {
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
-  public assignRoleAsync = async (id: number, roleIds: Array<number>): Promise<boolean> => {
+  public assignRoleAsync = async (
+    id: number,
+    roleIds: Array<number>,
+  ): Promise<boolean> => {
     try {
+      if (!roleIds.length)
+        throw new BadRequestException(ERRORS.NO_ROLES_SELECTED);
 
-      if (!roleIds.length) throw new Error('No roles selected to assign!');
-      
       // fetch the user and role
       const user: User = await this.usersRepository.findOne({
         where: { id, isActive: true },
@@ -180,54 +193,72 @@ export class UsersService {
             permissions: true,
           },
           permissions: true,
-        }
+        },
       });
-      if (!user) throw new Error(`User with ${id} was not found!`);
+      if (!user) throw new NotFoundException(ERRORS.USER_WITH_ID_NOT_FOUND(id));
 
-      // Fetch the roles to assign 
+      // Fetch the roles to assign
       const rolesToAssign: Array<Role> = await this.rolesRepository.findBy({
-        id: In(roleIds)
+        id: In(roleIds),
       });
 
       // Prevent adding super admin rights to a user
-      const tryingToCreateSuperAdmin: boolean = rolesToAssign.some((role: Role) => role.name.toLowerCase() === 'super-admin');
-      if (tryingToCreateSuperAdmin) throw new Error('Cannot assign super administrator rights to any user!');
+      const tryingToCreateSuperAdmin: boolean = rolesToAssign.some(
+        (role: Role) => role.name.toLowerCase() === 'super-admin',
+      );
+      if (tryingToCreateSuperAdmin)
+        throw new ForbiddenException(ERRORS.CANNOT_ASSIGN_SUPER_ADMIN);
 
       // Prevent removing super admin rights from an existing super admin
-      let isRemovingSuperAdminRights: boolean = user.roles.some((role: Role) => role.name.toLowerCase() === 'super-admin');
-      isRemovingSuperAdminRights = isRemovingSuperAdminRights && !rolesToAssign.some((role: Role) => role.name.toLowerCase() === 'super-admin');
-      if (isRemovingSuperAdminRights) throw new Error('Cannot remove super admin rights!');
+      let isRemovingSuperAdminRights: boolean = user.roles.some(
+        (role: Role) => role.name.toLowerCase() === 'super-admin',
+      );
+      isRemovingSuperAdminRights =
+        isRemovingSuperAdminRights &&
+        !rolesToAssign.some(
+          (role: Role) => role.name.toLowerCase() === 'super-admin',
+        );
+      if (isRemovingSuperAdminRights)
+        throw new ForbiddenException(ERRORS.CANNOT_REMOVE_SUPER_ADMIN);
 
       // assign new roles
       rolesToAssign.forEach((role: Role) => {
-        if (!user.roles.some((userRole: Role) => userRole.id === role.id)) user.roles.push(role);
+        if (!user.roles.some((userRole: Role) => userRole.id === role.id))
+          user.roles.push(role);
       });
 
       await this.usersRepository.save(user);
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
-  public assignPermissionAsync = async (id: number, permissionId: number): Promise<boolean> => {
+  public assignPermissionAsync = async (
+    id: number,
+    permissionId: number,
+  ): Promise<boolean> => {
     try {
       // fetch the user and permission
       const user: User = await this.usersRepository.findOne({
         where: { id, isActive: true },
         relations: {
           permissions: true,
-        }
+        },
       });
-      if (!user) throw new Error(`User with ${id} was not found!`);
+      if (!user) throw new NotFoundException(ERRORS.USER_WITH_ID_NOT_FOUND(id));
 
       const permission: Permission = await this.permissionsRepository.findOne({
         where: { id: permissionId },
       });
-      if (!permission) throw new Error(`Permission with id: ${permissionId} not found!`);
+      if (!permission)
+        throw new NotFoundException(ERRORS.PERMISSION_NOT_FOUND(permissionId));
 
-      const relationshipExists: boolean = user.permissions.some((searchedPermission: Permission) => searchedPermission.id === permission.id);
+      const relationshipExists: boolean = user.permissions.some(
+        (searchedPermission: Permission) =>
+          searchedPermission.id === permission.id,
+      );
       if (relationshipExists) return true;
 
       user.permissions.push(permission);
@@ -236,7 +267,7 @@ export class UsersService {
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 }

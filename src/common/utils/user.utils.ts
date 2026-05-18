@@ -16,8 +16,14 @@ export class UserUtils {
   ) {}
 
   public mapUserToUserResponseDto = (user: User): UserResponseDto => {
-    let permissions: Set<Permission> = new Set([...user.permissions || []]);
-    user.roles?.forEach((role: Role) => permissions = new Set([ ...(Array.from(permissions)), ...(role.permissions || []) ]));
+    let permissions: Set<Permission> = new Set([...(user.permissions || [])]);
+    user.roles?.forEach(
+      (role: Role) =>
+        (permissions = new Set([
+          ...Array.from(permissions),
+          ...(role.permissions || []),
+        ])),
+    );
 
     return {
       id: user.id,
@@ -30,7 +36,9 @@ export class UserUtils {
       lastLogin: user.lastLogin,
       createdAt: user.createdAt,
       roles: (user.roles || []).map(this.roleUtils.mapRoleToDto),
-      permissions: (Array.from(permissions) || []).map(this.permissionUtils.mapPermissionToDto),
+      permissions: (Array.from(permissions) || []).map(
+        this.permissionUtils.mapPermissionToDto,
+      ),
     };
   };
-};
+}

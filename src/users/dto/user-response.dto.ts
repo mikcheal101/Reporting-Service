@@ -28,8 +28,8 @@ export class UserResponseDto {
 
   @IsOptional()
   lastLogin?: Date;
-  
+
   createdAt: Date;
   roles: RoleDto[];
   permissions: PermissionDto[];
-};
+}

@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -14,8 +15,9 @@ import { ScheduleTaskRequestDto } from './dto/schedule-task.request.dto';
 import { Task } from './entity/task.entity';
 import { Response } from 'express';
 import { join } from 'node:path';
+import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@Controller('/api/v1/tasks')
+@Controller(ROUTES.TASKS)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -27,32 +29,35 @@ export class TasksController {
     try {
       return await this.tasksService.scheduleTaskAsync(scheduleTaskRequestDto);
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('pending-tasks')
+  @Get(ROUTE_PATHS.PENDING_TASKS)
   public async pendingTasks(): Promise<Task[]> {
     try {
       return await this.tasksService.fetchPendingTasksAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('completed-tasks')
+  @Get(ROUTE_PATHS.COMPLETED_TASKS)
   public async completedTasks(): Promise<Task[]> {
     try {
       return await this.tasksService.fetchCompletedTasksAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('download-report/:id')
+  @Get(ROUTE_PATHS.DOWNLOAD_REPORT)
   public async downloadFile(
     @Param('id') id: string,
     @Res() response: Response,
@@ -83,6 +88,7 @@ export class TasksController {
       response.setHeader('content-type', 'application/octet-stream');
       response.sendFile(filePath);
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }

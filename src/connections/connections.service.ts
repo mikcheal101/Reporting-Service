@@ -1,6 +1,11 @@
 // connections/connections.service.ts
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateConnectionRequestDto } from './dto/create-connection.request.dto';
@@ -12,6 +17,7 @@ import { Connection } from './entity/connections.entity';
 import { ConnectionTablesResponseDto } from './dto/connection-tables.response.dto';
 import { ConnectionDto } from './dto/connection.dto';
 import { ConnectionUtils } from './utils/connection.utils';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class ConnectionsService {
@@ -34,7 +40,7 @@ export class ConnectionsService {
       return await adapter.connectAsync();
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -48,7 +54,7 @@ export class ConnectionsService {
       return conns;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -60,7 +66,7 @@ export class ConnectionsService {
         name: connection.name,
       });
       if (exists) {
-        throw new Error('Connection already exists!');
+        throw new ConflictException(ERRORS.CONNECTION_NAME_EXISTS);
       }
 
       const encryptedPassword = this.cryptoService.encrypt(connection.password);
@@ -82,7 +88,7 @@ export class ConnectionsService {
       return this.connectionUtils.convertToDto(savedConnection);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -95,7 +101,7 @@ export class ConnectionsService {
         id: Number.parseInt(id),
       });
       if (!connection) {
-        throw new Error('Unable to find specified connection!');
+        throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
       }
 
       if (conn.password) {
@@ -111,7 +117,7 @@ export class ConnectionsService {
       return this.connectionUtils.convertToDto(updatedConnection);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -123,7 +129,7 @@ export class ConnectionsService {
       return connection;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -140,7 +146,7 @@ export class ConnectionsService {
       return connection;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -152,7 +158,7 @@ export class ConnectionsService {
       return deleted.affected > 0;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -162,7 +168,7 @@ export class ConnectionsService {
     // get the connection and its details
     const connection = await this.connectionsRepository.findOneBy({ id });
 
-    if (!connection) throw new Error('Unable to find specified connection!');
+    if (!connection) throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
 
     const adapter = DatabaseFactory.create({
       name: connection.name,
@@ -211,7 +217,7 @@ export class ConnectionsService {
       return connectionTablesResponseDto;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     } finally {
       await adapter.closeAsync();
     }

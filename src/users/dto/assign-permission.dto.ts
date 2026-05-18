@@ -1,6 +1,6 @@
 // users/dto/assign-permission.dto.ts
 
-import { IsNumber } from "class-validator";
+import { IsNumber } from 'class-validator';
 
 export default class AssignPermissionDto {
   @IsNumber()
@@ -8,4 +8,4 @@ export default class AssignPermissionDto {
 
   @IsNumber()
   permissionId: number;
-};
+}

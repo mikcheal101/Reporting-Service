@@ -9,7 +9,7 @@ export class RoleDto {
 
   @IsString()
   name: string;
-  
+
   createdAt: Date;
   permissions: PermissionDto[];
 }

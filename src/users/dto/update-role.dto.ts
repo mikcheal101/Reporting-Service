@@ -7,7 +7,7 @@ import { Type } from 'class-transformer';
 export default class UpdateRoleDto {
   @IsNumber()
   id: number;
-  
+
   @IsString()
   name: string;
 

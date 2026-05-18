@@ -1,6 +1,11 @@
 // report-types/report-types.service.ts
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReportType } from './entity/report-types.entity';
 import { Repository } from 'typeorm';
@@ -11,6 +16,7 @@ import { ReportTypeUtils } from './utils/report-type.utils';
 import { CronUtil } from 'src/common/utils/cron.utils';
 import { Task } from 'src/tasks/entity/task.entity';
 import { TaskStatus } from 'src/tasks/entity/task-status.enum';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class ReportTypesService {
@@ -39,7 +45,7 @@ export class ReportTypesService {
       return ReportTypeDtos;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error);
+      throw error;
     }
   };
 
@@ -51,7 +57,7 @@ export class ReportTypesService {
       return this.reportTypeUtils.convertToDto(reportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -65,7 +71,7 @@ export class ReportTypesService {
       });
 
       if (exists) {
-        throw new Error('Report Type already exists!');
+        throw new ConflictException(ERRORS.REPORT_TYPE_ALREADY_EXISTS);
       }
 
       const reportType = this.reportTypeRepository.create({
@@ -80,7 +86,7 @@ export class ReportTypesService {
       return this.reportTypeUtils.convertToDto(savedReportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -96,7 +102,7 @@ export class ReportTypesService {
       });
 
       if (!reportType) {
-        throw new Error('Unable to find Report Type!');
+        throw new NotFoundException(ERRORS.REPORT_TYPE_NOT_FOUND);
       }
 
       if (updateReportTypeRequestDto.emails?.length) {
@@ -142,7 +148,7 @@ export class ReportTypesService {
       return this.reportTypeUtils.convertToDto(updatedReportType);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 
@@ -152,7 +158,7 @@ export class ReportTypesService {
       return removed.affected > 0;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
   };
 }

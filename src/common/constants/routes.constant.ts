@@ -1,0 +1,31 @@
+export const ROUTES = {
+  AUTH: '/api/v1/auth',
+  USERS: '/api/v1/users',
+  CONNECTIONS: '/api/v1/connections',
+  REPORTS: '/api/v1/reports',
+  ROLES: '/api/v1/roles',
+  PERMISSIONS: '/api/v1/permissions',
+  REPORT_TYPES: '/api/v1/report-types',
+  TASKS: '/api/v1/tasks',
+  DASHBOARD: '/api/v1/dashboard',
+  AUDIT: '/api/v1/audit-logs',
+} as const;
+
+export const ROUTE_PATHS = {
+  LOGIN: 'login',
+  REGISTER: 'register',
+  LOGOUT: 'logout',
+  PROFILE: 'profile',
+  TEST_CONNECTION: 'test-connection',
+  TEST_QUERY: 'test-query',
+  SAVE_QUERY: 'save-query',
+  AI_GENERATE_QUERY: 'ai-generate-query',
+  REPORT_PARAMETERS: 'report-parameters',
+  ASSIGN_ROLE: 'assign-role',
+  ASSIGN_PERMISSION: 'assign-permission',
+  TABLES: ':id/tables',
+  ID: ':id',
+  PENDING_TASKS: 'pending-tasks',
+  COMPLETED_TASKS: 'completed-tasks',
+  DOWNLOAD_REPORT: 'download-report/:id',
+} as const;

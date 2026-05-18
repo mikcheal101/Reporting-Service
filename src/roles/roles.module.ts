@@ -10,6 +10,6 @@ import { PermissionUtils } from 'src/common/utils/permission.utils';
   providers: [RolesService, RoleUtils, PermissionUtils],
   exports: [RolesService, TypeOrmModule],
   imports: [TypeOrmModule.forFeature([Role])],
-  controllers: [RolesController]
+  controllers: [RolesController],
 })
 export class RolesModule {}

@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -16,8 +17,9 @@ import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
 import AssignRoleDto from './dto/assign-role.dto';
 import AssignPermissionDto from './dto/assign-permission.dto';
+import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@Controller('/api/v1/users')
+@Controller(ROUTES.USERS)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -27,16 +29,18 @@ export class UsersController {
     try {
       return await this.usersService.findAsync();
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(ROUTE_PATHS.ID)
   public async user(@Param('id') id: string): Promise<UserResponseDto> {
     try {
       return await this.usersService.findOneByIdAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
@@ -56,12 +60,13 @@ export class UsersController {
         createUserDto.middleName,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Put(':id')
+  @Put(ROUTE_PATHS.ID)
   public async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -76,23 +81,25 @@ export class UsersController {
         updateUserDto.middleName,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(ROUTE_PATHS.ID)
   public async deleteUser(@Param('id') id: string): Promise<boolean> {
     try {
       return await this.usersService.deleteUserAsync(Number.parseInt(id));
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   // assignments
   @HttpCode(HttpStatus.OK)
-  @Post('assign-role')
+  @Post(ROUTE_PATHS.ASSIGN_ROLE)
   public async assignRole(
     @Body() assignRoleDto: AssignRoleDto,
   ): Promise<boolean> {
@@ -102,12 +109,13 @@ export class UsersController {
         assignRoleDto.roleIds,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('assign-permission')
+  @Post(ROUTE_PATHS.ASSIGN_PERMISSION)
   public async assignPermission(
     @Body() assignPermissionDto: AssignPermissionDto,
   ): Promise<boolean> {
@@ -117,6 +125,7 @@ export class UsersController {
         assignPermissionDto.permissionId,
       );
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }

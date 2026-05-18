@@ -6,6 +6,8 @@ import { SignInRequestDto } from './dto/signin.request.dto';
 import { SignUpRequestDto } from './dto/signup.request.dto';
 import { UserResponseDto } from 'src/users/dto/user-response.dto';
 import { UserUtils } from 'src/common/utils/user.utils';
+import { jwtConstants } from './constants';
+import { ERRORS } from '../common/constants/error-messages.constant';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +25,7 @@ export class AuthService {
     try {
       const user = await this.usersService.findOneAsync(signInDto.email);
       if (!user) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(ERRORS.INVALID_EMAIL_OR_PASSWORD);
       }
 
       const isMatched: boolean = await bcrypt.compare(
@@ -31,31 +33,33 @@ export class AuthService {
         user?.password,
       );
       if (!isMatched) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(ERRORS.INVALID_EMAIL_OR_PASSWORD);
       }
 
       const payload = this.userUtils.mapUserToUserResponseDto(user);
 
       const token: string = await this.jwtService.signAsync(payload, {
-        expiresIn: '60m',
+        expiresIn: jwtConstants.expiresIn,
       });
       return token;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 
   public profile = async (id: number): Promise<UserResponseDto> => {
     try {
       return await this.usersService.findOneByIdAsync(id);
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error);
+      throw error;
     }
-  }
+  };
 
-  public signUp = async (signupDto: SignUpRequestDto): Promise<UserResponseDto> => {
+  public signUp = async (
+    signupDto: SignUpRequestDto,
+  ): Promise<UserResponseDto> => {
     // create a user model
     try {
       const created = await this.usersService.createUserAsync(
@@ -69,7 +73,7 @@ export class AuthService {
       return created;
     } catch (error) {
       this.logger.error(error.message, error.stack);
-      throw new Error(error.message);
+      throw error;
     }
-  }
+  };
 }
