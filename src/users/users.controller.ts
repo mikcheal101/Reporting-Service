@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -18,12 +19,16 @@ import UpdateUserDto from './dto/update-user.dto';
 import AssignRoleDto from './dto/assign-role.dto';
 import AssignPermissionDto from './dto/assign-permission.dto';
 import ChangePasswordDto from './dto/change-password.dto';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
+@UseGuards(AuthGuard)
 @Controller(ROUTES.USERS)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @RequirePermission('user.list')
   @HttpCode(HttpStatus.OK)
   @Get()
   public async users(): Promise<UserResponseDto[]> {
@@ -35,6 +40,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.view')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.ID)
   public async user(@Param('id') id: string): Promise<UserResponseDto> {
@@ -46,6 +52,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.create')
   @HttpCode(HttpStatus.CREATED)
   @Post()
   public async createUser(
@@ -66,6 +73,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.update')
   @HttpCode(HttpStatus.OK)
   @Put(ROUTE_PATHS.ID)
   public async updateUser(
@@ -87,6 +95,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.delete')
   @HttpCode(HttpStatus.OK)
   @Delete(ROUTE_PATHS.ID)
   public async deleteUser(@Param('id') id: string): Promise<boolean> {
@@ -98,6 +107,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.update')
   @HttpCode(HttpStatus.OK)
   @Post(ROUTE_PATHS.CHANGE_PASSWORD)
   public async changePassword(
@@ -117,6 +127,7 @@ export class UsersController {
   }
 
   // assignments
+  @RequirePermission('user.update')
   @HttpCode(HttpStatus.OK)
   @Post(ROUTE_PATHS.ASSIGN_ROLE)
   public async assignRole(
@@ -133,6 +144,7 @@ export class UsersController {
     }
   }
 
+  @RequirePermission('user.update')
   @HttpCode(HttpStatus.OK)
   @Post(ROUTE_PATHS.ASSIGN_PERMISSION)
   public async assignPermission(

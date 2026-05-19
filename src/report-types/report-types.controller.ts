@@ -10,19 +10,24 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ReportTypesService } from './report-types.service';
 import { CreateReportTypeRequestDto } from './dto/create-report-type.request.dto';
 import { UpdateReportTypeRequestDto } from './dto/update-report-type.request.dto';
 import { ReportTypeDto } from './dto/report-type.dto';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
+@UseGuards(AuthGuard)
 @Controller(ROUTES.REPORT_TYPES)
 export class ReportTypesController {
   constructor(private readonly reportTypeService: ReportTypesService) {}
 
   @HttpCode(HttpStatus.OK)
   @Get()
+  @RequirePermission('report-type.list')
   public async getReportTypes(): Promise<ReportTypeDto[]> {
     try {
       return await this.reportTypeService.fetchAllAsync();
@@ -34,6 +39,7 @@ export class ReportTypesController {
 
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.ID)
+  @RequirePermission('report-type.view')
   public async getReportType(@Param('id') id: string): Promise<ReportTypeDto> {
     try {
       return await this.reportTypeService.fetchOneAsync(Number.parseInt(id));
@@ -45,6 +51,7 @@ export class ReportTypesController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post()
+  @RequirePermission('report-type.create')
   public async createReportType(
     @Body() createReportTypeRequestDto: CreateReportTypeRequestDto,
   ): Promise<ReportTypeDto> {
@@ -79,6 +86,7 @@ export class ReportTypesController {
 
   @HttpCode(HttpStatus.OK)
   @Put(ROUTE_PATHS.ID)
+  @RequirePermission('report-type.update')
   public async updateReportType(
     @Param('id') id: string,
     @Body() updateReportTypeRequestDto: UpdateReportTypeRequestDto,
@@ -116,6 +124,7 @@ export class ReportTypesController {
 
   @HttpCode(HttpStatus.OK)
   @Delete(ROUTE_PATHS.ID)
+  @RequirePermission('report-type.delete')
   public async deleteReportType(@Param('id') id: string): Promise<boolean> {
     try {
       return await this.reportTypeService.deleteAsync(Number.parseInt(id));

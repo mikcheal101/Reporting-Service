@@ -132,6 +132,33 @@ export class AuditLogService {
     }
   };
 
+  /**
+   * Purge audit logs older than the specified number of days.
+   * Returns the count of deleted records.
+   */
+  public purgeOlderThanAsync = async (days: number): Promise<number> => {
+    try {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+
+      const result = await this.auditLogRepository
+        .createQueryBuilder()
+        .delete()
+        .from(AuditLog)
+        .where('createdAt < :cutoff', { cutoff })
+        .execute();
+
+      const count = result.affected || 0;
+      if (count > 0) {
+        this.logger.log(`Purged ${count} audit log(s) older than ${days} days`);
+      }
+      return count;
+    } catch (error) {
+      this.logger.error('Failed to purge audit logs', error.stack);
+      throw error;
+    }
+  };
+
   /** Fetch a single audit log by ID. */
   public findOneAsync = async (id: number): Promise<AuditLogResponseDto> => {
     try {

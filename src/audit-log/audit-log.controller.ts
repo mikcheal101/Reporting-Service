@@ -14,6 +14,7 @@ import {
   BadRequestException,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -21,11 +22,15 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AuditLogService } from './audit-log.service';
 import { AuditLogResponseDto } from './dto/audit-log-response.dto';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES } from '../common/constants/routes.constant';
 
+@UseGuards(AuthGuard)
 @Controller(ROUTES.AUDIT)
 export class AuditLogController {
   constructor(private readonly auditLogService: AuditLogService) {}
@@ -41,6 +46,7 @@ export class AuditLogController {
    * @query page    — page number (default: 1)
    * @query limit   — items per page (default: 20, max: 100)
    */
+  @RequirePermission('audit-log.list')
   @HttpCode(HttpStatus.OK)
   @Get()
   public async findAll(
@@ -76,6 +82,26 @@ export class AuditLogController {
   ): Promise<AuditLogResponseDto> {
     try {
       return await this.auditLogService.findOneAsync(id);
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
+   * Purge audit logs older than the specified number of days.
+   * Requires audit-log.delete permission.
+   * Default retention: 365 days.
+   */
+  @HttpCode(HttpStatus.OK)
+  @Delete('purge')
+  @RequirePermission('audit-log.delete')
+  public async purge(
+    @Query('days', new DefaultValuePipe(365), ParseIntPipe) days: number,
+  ): Promise<{ purged: number; retentionDays: number }> {
+    try {
+      const purged = await this.auditLogService.purgeOlderThanAsync(days);
+      return { purged, retentionDays: days };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);

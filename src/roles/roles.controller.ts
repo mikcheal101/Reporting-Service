@@ -10,18 +10,23 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import CreateRoleDto from 'src/users/dto/create-role.dto';
 import { RoleDto } from 'src/users/dto/role.dto';
 import UpdateRoleDto from 'src/users/dto/update-role.dto';
 import { RolesService } from './roles.service';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
+@UseGuards(AuthGuard)
 @Controller(ROUTES.ROLES)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   // Roles part
+  @RequirePermission('role.list')
   @HttpCode(HttpStatus.OK)
   @Get()
   public async roles(): Promise<RoleDto[]> {
@@ -33,6 +38,7 @@ export class RolesController {
     }
   }
 
+  @RequirePermission('role.view')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.ID)
   public async role(@Param('id') id: string): Promise<RoleDto> {
@@ -44,6 +50,7 @@ export class RolesController {
     }
   }
 
+  @RequirePermission('role.create')
   @HttpCode(HttpStatus.CREATED)
   @Post()
   public async createRole(
@@ -60,6 +67,7 @@ export class RolesController {
     }
   }
 
+  @RequirePermission('role.update')
   @HttpCode(HttpStatus.OK)
   @Put(ROUTE_PATHS.ID)
   public async updateRole(
@@ -78,6 +86,7 @@ export class RolesController {
     }
   }
 
+  @RequirePermission('role.delete')
   @HttpCode(HttpStatus.OK)
   @Delete(ROUTE_PATHS.ID)
   public async deleteRole(@Param('id') id: string): Promise<boolean> {

@@ -9,18 +9,23 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { ScheduleTaskRequestDto } from './dto/schedule-task.request.dto';
 import { Task } from './entity/task.entity';
 import { Response } from 'express';
 import { join } from 'node:path';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
+@UseGuards(AuthGuard)
 @Controller(ROUTES.TASKS)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
+  @RequirePermission('task.create')
   @HttpCode(HttpStatus.OK)
   @Post()
   public async scheduleTask(
@@ -34,6 +39,7 @@ export class TasksController {
     }
   }
 
+  @RequirePermission('task.list')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.PENDING_TASKS)
   public async pendingTasks(): Promise<Task[]> {
@@ -45,6 +51,7 @@ export class TasksController {
     }
   }
 
+  @RequirePermission('task.list')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.COMPLETED_TASKS)
   public async completedTasks(): Promise<Task[]> {
@@ -56,6 +63,7 @@ export class TasksController {
     }
   }
 
+  @RequirePermission('task.view')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.DOWNLOAD_REPORT)
   public async downloadFile(

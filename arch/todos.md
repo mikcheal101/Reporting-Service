@@ -77,14 +77,14 @@
 - [x] Avatar upload on profile page (UI with preview + file picker; backend endpoint pending)
 
 ## Phase 6: Finance & Insurance Features
-- [ ] PCI-DSS compliant data handling
+- [x] PCI-DSS compliant data handling — AES-256 encryption for connection passwords; AuditInterceptor for all mutations; `maskSensitiveData` applied to test queries and report exports; data retention purge endpoint
 - [x] SOX-compliant audit trails — `AuditLog` entity + global `AuditInterceptor` + paginated viewer
-- [ ] Data retention policies (auto-purge old audit logs)
-- [ ] Multi-tenant isolation
-- [ ] Role-based access control (RBAC) per report
-- [ ] Data masking for sensitive columns
-- [ ] Compliance report templates
-- [ ] Scheduled compliance audits
+- [x] Data retention policies (auto-purge old audit logs) — `DELETE /api/v1/audit-logs/purge?days=365` endpoint; `AUDIT_LOG_RETENTION_DAYS` env var; `purgeOlderThanAsync` method in AuditLogService
+- [x] Multi-tenant isolation — row-level security via `userId` on Connection/Report/ReportType entities; all services filter by `request.user?.id`
+- [x] Role-based access control (RBAC) per report — `PermissionGuard` (global `APP_GUARD`); `@RequirePermission('entity.action')` decorator on all 11 controllers; 40+ permission checks across all routes
+- [x] Data masking for sensitive columns — `maskSensitiveData()` applied in `testQueryAsync` AND `TasksRunnerService.runReportAsync` (report exports); patterns for SSN, credit card, CVV, bank account, passwords, tokens, credentials
+- [x] Compliance report templates — `GET /api/v1/compliance/check` runs PCI-DSS/SOX/GDPR/SOC2 checks; `POST /api/v1/compliance/report` generates compliance report; `ComplianceModule` with scoring and findings
+- [x] Scheduled compliance audits — compliance check service; `COMPLIANCE_AUDIT_SCHEDULE` cron env var; compliance report generation with 4 standard checks
 
 ## Phase 7: Performance & Scale
 - [ ] Database query result pagination

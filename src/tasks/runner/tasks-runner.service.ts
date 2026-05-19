@@ -14,6 +14,7 @@ import { MailService } from 'src/mail/mail.service';
 import { FileFormatFactory } from 'src/common/utils/file-format.factory';
 import { join } from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { maskSensitiveData } from 'src/common/utils/data-masking.utils';
 
 @Injectable()
 export class TasksRunnerService {
@@ -172,11 +173,15 @@ export class TasksRunnerService {
 
     const queryTimeout = task.report.connection.queryTimeout ?? 60000;
 
-    const dbResponse = await adapter.queryAsync(
+    let dbResponse = await adapter.queryAsync(
       task.report.queryString,
       parameters,
       queryTimeout,
     );
+
+    if (Array.isArray(dbResponse)) {
+      dbResponse = maskSensitiveData(dbResponse);
+    }
 
     this.logger.log(`${task.name} fetching response from query run`);
     return dbResponse;
