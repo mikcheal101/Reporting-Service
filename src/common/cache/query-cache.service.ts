@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import NodeCache from 'node-cache';
+import * as NodeCache from 'node-cache';
 import { createHash } from 'node:crypto';
 
 @Injectable()

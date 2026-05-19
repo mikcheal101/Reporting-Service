@@ -17,10 +17,11 @@ import { RoleDto } from 'src/users/dto/role.dto';
 import UpdateRoleDto from 'src/users/dto/update-role.dto';
 import { RolesService } from './roles.service';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.ROLES)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}

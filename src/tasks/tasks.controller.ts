@@ -17,10 +17,11 @@ import { Task } from './entity/task.entity';
 import { Response } from 'express';
 import { join } from 'node:path';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.TASKS)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}

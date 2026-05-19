@@ -9,6 +9,7 @@ import { UserUtils } from 'src/common/utils/user.utils';
 import { jwtConstants } from './constants';
 import { ERRORS } from '../common/constants/error-messages.constant';
 
+
 @Injectable()
 export class AuthService {
   private readonly logger: Logger;
@@ -36,7 +37,26 @@ export class AuthService {
         throw new UnauthorizedException(ERRORS.INVALID_EMAIL_OR_PASSWORD);
       }
 
-      const payload = this.userUtils.mapUserToUserResponseDto(user);
+      const userDto = this.userUtils.mapUserToUserResponseDto(user);
+
+      const payload = {
+        id: userDto.id,
+        username: userDto.username,
+        firstName: userDto.firstName,
+        lastName: userDto.lastName,
+        middleName: userDto.middleName,
+        phoneNumber: userDto.phoneNumber,
+        isActive: userDto.isActive,
+        lastLogin: userDto.lastLogin,
+        createdAt: userDto.createdAt,
+        roles: (userDto.roles || []).map((r) => ({
+          id: r.id,
+          name: r.name,
+          createdAt: r.createdAt,
+          permissions: (r.permissions || []).map((p) => ({ id: p.id, name: p.name })),
+        })),
+        permissions: (userDto.permissions || []).map((p) => ({ id: p.id, name: p.name })),
+      };
 
       const token: string = await this.jwtService.signAsync(payload, {
         expiresIn: jwtConstants.expiresIn,

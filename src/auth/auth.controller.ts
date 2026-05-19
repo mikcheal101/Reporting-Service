@@ -18,6 +18,7 @@ import { SignUpRequestDto } from './dto/signup.request.dto';
 import { Response } from 'express';
 import { SignInResponseDto } from './dto/signin.response.dto';
 import { AuthGuard } from './guard/auth.guard';
+import { PermissionGuard } from './guard/permission.guard';
 import {
   clearAccessTokenCookie,
   setAccessTokenCookie,
@@ -80,7 +81,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.PROFILE)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
   public async profile(@Req() request): Promise<UserResponseDto> {
     try {
       const user = request.user;

@@ -56,6 +56,9 @@ export class Connection {
   @Column({ default: false })
   streamEnabled: boolean;
 
+  @Column({ nullable: true, type: 'nvarchar', length: 500 })
+  description: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

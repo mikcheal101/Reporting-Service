@@ -27,10 +27,11 @@ import {
 import { AuditLogService } from './audit-log.service';
 import { AuditLogResponseDto } from './dto/audit-log-response.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.AUDIT)
 export class AuditLogController {
   constructor(private readonly auditLogService: AuditLogService) {}

@@ -26,10 +26,11 @@ import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.d
 import DatabaseTimeOutError from 'src/common/errors/databasetimeout.error';
 import DatabaseDeadLockError from 'src/common/errors/databasedeadlock.error';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.REPORTS)
 export class ReportsController {
   private readonly logger: Logger;
