@@ -58,17 +58,21 @@ export class AuditInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         try {
-          this.auditLogService.createAsync({
-            userId: user?.id,
-            username: user?.username,
-            action: method,
-            entity,
-            entityId: request.params?.id
-              ? Number(request.params.id)
-              : undefined,
-            newValues: method !== 'DELETE' ? request.body : undefined,
-            ipAddress: request.ip,
-          });
+          this.auditLogService
+            .createAsync({
+              userId: user?.id,
+              username: user?.username,
+              action: method,
+              entity,
+              entityId: request.params?.id
+                ? Number(request.params.id)
+                : undefined,
+              newValues: method !== 'DELETE' ? request.body : undefined,
+              ipAddress: request.ip,
+            })
+            .catch((error) => {
+              this.logger.error('Failed to write audit log', error.stack);
+            });
         } catch (error) {
           this.logger.error('Failed to write audit log', error.stack);
         }

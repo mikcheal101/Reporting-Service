@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -22,9 +22,31 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { AuditInterceptor } from './audit-log/interceptor/audit.interceptor';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ObservabilityModule } from './observability/observability.module';
+import { MetricsInterceptor } from './observability/metrics/metrics.interceptor';
+import { MetricsService } from './observability/metrics/metrics.service';
+import { GracefulShutdownService } from './observability/graceful-shutdown.service';
+import { SentryFilter } from './observability/sentry.filter';
+import { LoggerModule } from 'nestjs-pino';
+import { CircuitBreakerModule } from './observability/circuit-breaker/circuit-breaker.module';
+import { DbPoolMonitorModule } from './observability/db-pool-monitor/db-pool-monitor.module';
+import { TracingModule } from './observability/tracing/tracing.module';
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.LOG_LEVEL || 'info',
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty', options: { colorize: true } } : undefined,
+        serializers: {
+          req: (req) => ({ method: req.method, url: req.url }),
+          res: (res) => ({ statusCode: res.statusCode }),
+        },
+        autoLogging: {
+          ignore: (req) => (req as { url?: string }).url === '/api/v1/health',
+        },
+      },
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -48,6 +70,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
         migrationsRun: true,
         migrations: ['dist/database/migrations/*.js'],
         autoLoadEntities: true,
+        extra: {
+          max: 20,
+          min: 2,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 5000,
+        },
         options: {
           encrypt: true,
           trustServerCertificate: true,
@@ -71,10 +99,15 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     PermissionsModule,
     DashboardModule,
     AuditLogModule,
+    ObservabilityModule,
+    CircuitBreakerModule,
+    DbPoolMonitorModule,
+    TracingModule,
   ],
   controllers: [AppController, RolesController, PermissionsController],
   providers: [
     AppService,
+    GracefulShutdownService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -83,6 +116,15 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
       provide: APP_INTERCEPTOR,
       useClass: AuditInterceptor,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: MetricsInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryFilter,
+    },
+    MetricsService,
   ],
 })
 export class AppModule {}

@@ -27,14 +27,14 @@
 - [x] `.env.example` created for both backend and frontend documenting all required vars
 
 ## Phase 3: Observability & Reliability
-- [ ] Health check endpoint (`GET /api/v1/health`)
-- [ ] Structured logging (JSON format)
-- [ ] OpenTelemetry tracing
-- [ ] Metrics endpoint (Prometheus)
-- [ ] Graceful shutdown handler
-- [ ] Database connection pool monitoring
-- [ ] Circuit breaker for external DB connections
-- [ ] Error tracking integration (Sentry)
+- [x] Health check endpoint (`GET /api/v1/health`)
+- [x] Structured logging (JSON format via pino-http + pino-pretty)
+- [x] OpenTelemetry tracing
+- [x] Metrics endpoint (Prometheus)
+- [x] Graceful shutdown handler
+- [x] Database connection pool monitoring
+- [x] Circuit breaker for external DB connections
+- [x] Error tracking integration (Sentry)
 
 ## Phase 4: Reporting Engine
 - [x] Scheduled report execution with cron
@@ -62,6 +62,7 @@
 - [x] Standardised shadcn theme tokens across all tables (`border-border`, `bg-card`, `text-foreground`, `hover:bg-muted/30`)
 - [x] All react-icons/fa replaced with lucide-react equivalents
 - [x] Consistent sheet widths (400px view / 480px form / 560px complex)
+- [x] First-time guided tour (Driver.js, 8 steps covering sidebar, dashboard, reports, connections, settings)
 - [ ] Error boundaries per page (React Error Boundary components)
 - [ ] Dark mode toggle (UI switch)
 - [ ] Avatar upload on profile page
