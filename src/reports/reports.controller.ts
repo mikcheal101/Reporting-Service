@@ -26,6 +26,7 @@ import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.d
 import DatabaseTimeOutError from 'src/common/errors/databasetimeout.error';
 import DatabaseDeadLockError from 'src/common/errors/databasedeadlock.error';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
 @UseGuards(AuthGuard)
@@ -37,6 +38,7 @@ export class ReportsController {
     this.logger = new Logger(ReportsController.name);
   }
 
+  @RequirePermission('report.create')
   @HttpCode(HttpStatus.CREATED)
   @Post()
   public async saveReport(
@@ -54,6 +56,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.list')
   @HttpCode(HttpStatus.OK)
   @Get()
   public async getReports(@Req() request: Request): Promise<ReportDto[]> {
@@ -65,6 +68,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.create')
   @Post(ROUTE_PATHS.TEST_QUERY)
   public async testQuery(
     @Body() queryRequestDto: QueryRequestDto,
@@ -90,6 +94,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.update')
   @HttpCode(HttpStatus.CREATED)
   @Post(ROUTE_PATHS.SAVE_QUERY)
   public async saveQuery(
@@ -107,6 +112,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.create')
   @HttpCode(HttpStatus.OK)
   @Post(ROUTE_PATHS.AI_GENERATE_QUERY)
   public async generateQueryViaAI(
@@ -124,6 +130,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.view')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.REPORT_PARAMETERS)
   public async getReportParameters(
@@ -141,6 +148,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.view')
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.ID)
   public async getReport(
@@ -158,6 +166,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.update')
   @HttpCode(HttpStatus.OK)
   @Put(ROUTE_PATHS.ID)
   public async updateReport(
@@ -177,6 +186,7 @@ export class ReportsController {
     }
   }
 
+  @RequirePermission('report.delete')
   @HttpCode(HttpStatus.OK)
   @Delete(ROUTE_PATHS.ID)
   public async deleteReport(

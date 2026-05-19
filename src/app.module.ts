@@ -3,6 +3,7 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { PermissionGuard } from './auth/guard/permission.guard';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
@@ -31,6 +32,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { CircuitBreakerModule } from './observability/circuit-breaker/circuit-breaker.module';
 import { DbPoolMonitorModule } from './observability/db-pool-monitor/db-pool-monitor.module';
 import { TracingModule } from './observability/tracing/tracing.module';
+import { ComplianceModule } from './compliance/compliance.module';
 import { CacheModule } from './common/cache/cache.module';
 
 @Module({
@@ -105,6 +107,7 @@ import { CacheModule } from './common/cache/cache.module';
     DbPoolMonitorModule,
     CacheModule,
     TracingModule,
+    ComplianceModule,
   ],
   controllers: [AppController, RolesController, PermissionsController],
   providers: [
@@ -113,6 +116,10 @@ import { CacheModule } from './common/cache/cache.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
     },
     {
       provide: APP_INTERCEPTOR,

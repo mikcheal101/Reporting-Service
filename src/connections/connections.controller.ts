@@ -19,6 +19,7 @@ import { CreateConnectionRequestDto } from './dto/create-connection.request.dto'
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
 @UseGuards(AuthGuard)
@@ -28,6 +29,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Post(ROUTE_PATHS.TEST_CONNECTION)
+  @RequirePermission('connection.view')
   public async testConnection(
     @Body() testConnectionDto: TestConnectionRequestDto,
   ) {
@@ -43,6 +45,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
+  @RequirePermission('connection.list')
   public async getConnections(@Req() request: Request) {
     try {
       return await this.connectionsService.connectionsAsync(request.user?.id);
@@ -54,6 +57,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post()
+  @RequirePermission('connection.create')
   public async createConnection(
     @Body() createConnectionDto: CreateConnectionRequestDto,
     @Req() request: Request,
@@ -71,6 +75,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Put(ROUTE_PATHS.ID)
+  @RequirePermission('connection.update')
   public async updateConnection(
     @Param('id') id: string,
     @Body() updateConnectionDto: UpdateConnectionRequestDto,
@@ -90,6 +95,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.ID)
+  @RequirePermission('connection.view')
   public async getConnection(@Param('id') id: string, @Req() request: Request) {
     try {
       return await this.connectionsService.getDecryptedConnectionAsync(
@@ -104,6 +110,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.TABLES)
+  @RequirePermission('connection.view')
   public async getConnectionTables(
     @Param('id') id: string,
     @Req() request: Request,
@@ -121,6 +128,7 @@ export class ConnectionsController {
 
   @HttpCode(HttpStatus.OK)
   @Delete(ROUTE_PATHS.ID)
+  @RequirePermission('connection.delete')
   public async deleteConnection(
     @Param('id') id: string,
     @Req() request: Request,
