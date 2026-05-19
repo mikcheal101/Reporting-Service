@@ -1,4 +1,5 @@
-import { Pool, types } from 'pg';
+import { Pool, types, Query, QueryResult } from 'pg';
+import { Readable } from 'node:stream';
 import { IDatabaseAdapter } from './idatabase.adapter';
 import { ConnectionRequestDto } from '../dto/connection.request.dto';
 import { DatabaseDatatype } from 'src/common/models/database.datatypes.enum';
@@ -44,6 +45,7 @@ export class PostgresqlAdapter implements IDatabaseAdapter {
   ): Promise<any> => {
     try {
       const params = this.mapParameters(parameters);
+      await this.client.query(`SET statement_timeout = ${timeOutMs}`);
       const result = await this.client.query({
         text: sql,
         values: params,
@@ -82,6 +84,18 @@ export class PostgresqlAdapter implements IDatabaseAdapter {
           return String(metadata.value);
       }
     });
+  };
+
+  public streamQueryAsync = (
+    sql: string,
+    parameters: Record<string, { type: DatabaseDatatype; value: any }> = {},
+    timeOutMs: number = 60000,
+  ): Readable => {
+    const params = this.mapParameters(parameters);
+    this.client.query(`SET statement_timeout = ${timeOutMs}`);
+    const query = new Query({ text: sql, values: params });
+    const stream = this.client.query(query);
+    return stream as Readable;
   };
 
   public closeAsync = async (): Promise<boolean> => {

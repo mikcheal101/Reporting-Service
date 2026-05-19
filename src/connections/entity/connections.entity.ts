@@ -44,6 +44,18 @@ export class Connection {
   @Column({ nullable: true })
   userId: number;
 
+  @Column({ default: 60000 })
+  queryTimeout: number;
+
+  @Column({ default: false })
+  cacheEnabled: boolean;
+
+  @Column({ default: 300 })
+  cacheTtl: number;
+
+  @Column({ default: false })
+  streamEnabled: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -31,6 +31,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { CircuitBreakerModule } from './observability/circuit-breaker/circuit-breaker.module';
 import { DbPoolMonitorModule } from './observability/db-pool-monitor/db-pool-monitor.module';
 import { TracingModule } from './observability/tracing/tracing.module';
+import { CacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
@@ -102,6 +103,7 @@ import { TracingModule } from './observability/tracing/tracing.module';
     ObservabilityModule,
     CircuitBreakerModule,
     DbPoolMonitorModule,
+    CacheModule,
     TracingModule,
   ],
   controllers: [AppController, RolesController, PermissionsController],
