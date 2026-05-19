@@ -42,9 +42,12 @@
 - [x] Email delivery of reports
 - [x] Report templates with parameterized queries
 - [x] Report execution history with logs
-- [ ] Query timeout per data source
-- [ ] Result caching layer
-- [ ] Large result set streaming
+- [x] Query timeout per data source — configurable per-connection (`queryTimeout` column, default 60s), replaces hardcoded 3h in task runner, wired through all 8 adapters
+- [x] Result caching layer — in-memory `QueryCacheService` (node-cache), per-connection toggle (`cacheEnabled`/`cacheTtl`), auto-invalidated on connection update
+- [x] Large result set streaming — `streamQueryAsync` on `IDatabaseAdapter`, implemented for MSSQL (mssql `request.stream`) and PostgreSQL (`pg.Query` stream), per-connection toggle (`streamEnabled`)
+- [x] Preview result limit — test queries capped at 5 rows (full reports return all rows)
+- [x] Sensitive data masking — automatic masking of password/secret/token/SSN/credit card columns in preview only (full reports unmasked)
+- [x] Cache invalidation — query cache flushed when connection settings are updated
 
 ## Phase 5: UX & UI
 - [x] Clean light theme with dark-blue primary (`--primary: 227 36% 39%`)

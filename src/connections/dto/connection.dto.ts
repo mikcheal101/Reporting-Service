@@ -10,4 +10,8 @@ export class ConnectionDto {
   database: string;
   isTestSuccessful: boolean;
   databaseType: DatabaseType;
+  queryTimeout: number;
+  cacheEnabled: boolean;
+  cacheTtl: number;
+  streamEnabled: boolean;
 }

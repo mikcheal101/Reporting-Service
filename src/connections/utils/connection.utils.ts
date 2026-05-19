@@ -24,6 +24,10 @@ export class ConnectionUtils {
         port: connection.port,
         server: connection.server,
         user: connection.user,
+        queryTimeout: connection.queryTimeout,
+        cacheEnabled: connection.cacheEnabled,
+        cacheTtl: connection.cacheTtl,
+        streamEnabled: connection.streamEnabled,
       };
     } catch (error) {
       this.logger.error(error.message, error.stack);

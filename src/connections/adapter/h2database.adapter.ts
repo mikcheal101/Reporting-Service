@@ -44,6 +44,7 @@ export class H2DatabaseAdapter implements IDatabaseAdapter {
   ): Promise<any> => {
     try {
       const params = this.mapParameters(parameters);
+      await this.client.query(`SET statement_timeout = ${timeOutMs}`);
       const result = await this.client.query({
         text: sql,
         values: params,

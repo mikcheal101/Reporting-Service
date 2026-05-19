@@ -13,6 +13,7 @@ import { CryptoService } from 'src/common/security/crypto/crypto.service';
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
 import { DatabaseFactory } from './database.factory';
+import { QueryCacheService } from 'src/common/cache/query-cache.service';
 import { Connection } from './entity/connections.entity';
 import { ConnectionTablesResponseDto } from './dto/connection-tables.response.dto';
 import { ConnectionDto } from './dto/connection.dto';
@@ -28,6 +29,7 @@ export class ConnectionsService {
     private readonly connectionsRepository: Repository<Connection>,
     private readonly connectionUtils: ConnectionUtils,
     private readonly cryptoService: CryptoService,
+    private readonly queryCache: QueryCacheService,
   ) {
     this.logger = new Logger(ConnectionsService.name);
   }
@@ -83,6 +85,10 @@ export class ConnectionsService {
         database: connection.database,
         databaseType: connection.databaseType,
         isTestSuccessful: connection.isTestSuccessful,
+        queryTimeout: connection.queryTimeout ?? 60000,
+        cacheEnabled: connection.cacheEnabled ?? false,
+        cacheTtl: connection.cacheTtl ?? 300,
+        streamEnabled: connection.streamEnabled ?? false,
         userId,
       });
 
@@ -118,6 +124,8 @@ export class ConnectionsService {
 
       const updatedConnection =
         await this.connectionsRepository.save(connection);
+
+      this.queryCache.invalidate(updatedConnection.id);
 
       return this.connectionUtils.convertToDto(updatedConnection);
     } catch (error) {

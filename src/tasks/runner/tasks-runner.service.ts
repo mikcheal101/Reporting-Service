@@ -170,10 +170,12 @@ export class TasksRunnerService {
       throw new BadRequestException(error.message);
     }
 
+    const queryTimeout = task.report.connection.queryTimeout ?? 60000;
+
     const dbResponse = await adapter.queryAsync(
       task.report.queryString,
       parameters,
-      3 * 60 * 60 * 1000, // 3 hours
+      queryTimeout,
     );
 
     this.logger.log(`${task.name} fetching response from query run`);

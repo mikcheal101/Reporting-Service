@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export abstract class ConnectionRequestDto {
   @IsString()
@@ -28,4 +28,20 @@ export abstract class ConnectionRequestDto {
   @IsString()
   @IsNotEmpty()
   user: string;
+
+  @IsNumber()
+  @IsOptional()
+  queryTimeout?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  cacheEnabled?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  cacheTtl?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  streamEnabled?: boolean;
 }

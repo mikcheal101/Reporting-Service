@@ -21,6 +21,8 @@ import { AiQueryGenerationRequestDto } from './dto/ai-query-generation.request.d
 import { IDatabaseAdapter } from 'src/connections/adapter/idatabase.adapter';
 import { ERRORS } from '../common/constants/error-messages.constant';
 import { QueryValidatorUtils } from '../common/utils/query-validator.utils';
+import { QueryCacheService } from 'src/common/cache/query-cache.service';
+import { maskSensitiveData } from 'src/common/utils/data-masking.utils';
 
 @Injectable()
 export class ReportsService {
@@ -34,6 +36,7 @@ export class ReportsService {
     private readonly cryptoService: CryptoService,
     private readonly databaseUtils: DatabaseUtils,
     private readonly reportUtils: ReportUtils,
+    private readonly queryCache: QueryCacheService,
   ) {
     this.logger = new Logger(ReportsService.name);
   }
@@ -217,10 +220,35 @@ export class ReportsService {
 
     try {
       await adapter.connectAsync();
-      const response = await adapter.queryAsync(
+      const queryTimeout = report.connection.queryTimeout ?? 60000;
+
+      const cacheKey = this.queryCache.buildKey(
+        report.connection.id,
         queryRequestDto.queryString,
         parameters,
       );
+      const cached = report.connection.cacheEnabled
+        ? this.queryCache.get<any[]>(cacheKey)
+        : undefined;
+      if (cached) {
+        return JSON.stringify(cached);
+      }
+
+      let response = await adapter.queryAsync(
+        queryRequestDto.queryString,
+        parameters,
+        queryTimeout,
+      );
+
+      if (Array.isArray(response)) {
+        response = response.slice(0, 5);
+      }
+      response = maskSensitiveData(response);
+
+      if (report.connection.cacheEnabled) {
+        this.queryCache.set(cacheKey, response, report.connection.cacheTtl);
+      }
+
       return JSON.stringify(response);
     } catch (error) {
       this.logger.error(error.message, error.stack);

@@ -7,6 +7,8 @@ import DatabaseTimeOutError from 'src/common/errors/databasetimeout.error';
 import DatabaseDeadLockError from 'src/common/errors/databasedeadlock.error';
 import { DatabaseType } from '../databasetype.enum';
 
+import { Readable } from 'node:stream';
+
 export class MssqlAdapter implements IDatabaseAdapter {
   private connector: mssql.ConnectionPool;
   protected connectionDto: ConnectionRequestDto;
@@ -107,6 +109,21 @@ export class MssqlAdapter implements IDatabaseAdapter {
       this.logger.error(error.message, error.stack);
       return undefined;
     }
+  };
+
+  public streamQueryAsync = (
+    sql: string,
+    parameters: Record<string, { type: DatabaseDatatype; value: any }> = {},
+    timeOutMs: number = 60000,
+  ): Readable => {
+    const request = this.bindParametersToQuery(
+      this.connector.request(),
+      parameters,
+    );
+    request.timeout = timeOutMs;
+    request.stream = true;
+    request.query(sql);
+    return request as unknown as Readable;
   };
 
   public closeAsync = async (): Promise<boolean> => {
