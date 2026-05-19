@@ -5,7 +5,9 @@ import { Report } from 'src/reports/entity/report.entity';
 import { Task } from 'src/tasks/entity/task.entity';
 import { TaskStatus } from 'src/tasks/entity/task-status.enum';
 import { ReportType } from 'src/report-types/entity/report-types.entity';
+import { Frequency } from 'src/report-types/entity/frequency.enum';
 import { Connection } from 'src/connections/entity/connections.entity';
+import { DatabaseType } from 'src/connections/databasetype.enum';
 import { User } from 'src/users/entity/users.entity';
 
 @Injectable()
@@ -23,7 +25,7 @@ export class DashboardService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getMetricsAsync() {
+  async getMetricsAsync(userId?: number) {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -36,6 +38,9 @@ export class DashboardService {
       59,
     );
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const reportWhere = userId ? { userId } : {};
+    const connectionWhere = userId ? { userId } : {};
 
     const [
       totalReports,
@@ -51,21 +56,27 @@ export class DashboardService {
       executionTrendsRaw,
       topReportsRaw,
       dailyErrorRatesRaw,
+      reportsByFrequencyRaw,
+      connectionTypesRaw,
+      recentTasks,
+      taskCount,
     ] = await Promise.all([
-      this.reportRepository.count(),
+      this.reportRepository.count({ where: reportWhere }),
       this.reportRepository.count({
-        where: { createdAt: Between(firstOfMonth, now) },
+        where: { ...reportWhere, createdAt: Between(firstOfMonth, now) },
       }),
       this.reportRepository.count({
-        where: { createdAt: Between(startOfLastMonth, endOfLastMonth) },
+        where: { ...reportWhere, createdAt: Between(startOfLastMonth, endOfLastMonth) },
       }),
-      this.connectionRepository.count(),
+      this.connectionRepository.count({ where: connectionWhere }),
       this.userRepository.count(),
       this.reportTypeRepository.count(),
       this.taskRepository
         .createQueryBuilder('task')
+        .leftJoin('task.report', 'report')
         .select('task.status', 'status')
         .addSelect('COUNT(*)', 'count')
+        .where(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
         .groupBy('task.status')
         .getRawMany(),
       this.reportTypeRepository
@@ -73,11 +84,13 @@ export class DashboardService {
         .leftJoin('rt.reports', 'r')
         .select('rt.name', 'type')
         .addSelect('COUNT(r.id)', 'count')
+        .where(userId ? 'r.userId = :userId' : '1=1', userId ? { userId } : {})
         .groupBy('rt.id')
         .addGroupBy('rt.name')
         .getRawMany(),
       this.taskRepository.findOne({
         where: {
+          ...(userId ? { report: { userId } } : {}),
           status: TaskStatus.COMPLETED,
           executedAt: MoreThan(new Date(0)),
         },
@@ -86,12 +99,15 @@ export class DashboardService {
       }),
       this.taskRepository
         .createQueryBuilder('task')
+        .leftJoin('task.report', 'report')
         .select('AVG(task.duration)', 'avg')
         .where('task.status = :status', { status: TaskStatus.COMPLETED })
         .andWhere('task.duration IS NOT NULL')
+        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
         .getRawOne(),
       this.taskRepository
         .createQueryBuilder('task')
+        .leftJoin('task.report', 'report')
         .select('CAST(task.executedAt AS DATE)', 'date')
         .addSelect('COUNT(*)', 'count')
         .addSelect('COALESCE(AVG(task.duration), 0)', 'avgTime')
@@ -99,6 +115,7 @@ export class DashboardService {
         .andWhere('task.status IN (:...statuses)', {
           statuses: [TaskStatus.COMPLETED, TaskStatus.FAILED],
         })
+        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
         .groupBy('CAST(task.executedAt AS DATE)')
         .orderBy('CAST(task.executedAt AS DATE)', 'ASC')
         .getRawMany(),
@@ -110,12 +127,14 @@ export class DashboardService {
         .addSelect('COALESCE(AVG(task.duration), 0)', 'avgTime')
         .where('task.status = :status', { status: TaskStatus.COMPLETED })
         .andWhere('task.duration IS NOT NULL')
+        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
         .groupBy('report.name')
         .orderBy('COUNT(*)', 'DESC')
         .limit(5)
         .getRawMany(),
       this.taskRepository
         .createQueryBuilder('task')
+        .leftJoin('task.report', 'report')
         .select('CAST(task.executedAt AS DATE)', 'date')
         .addSelect(
           `SUM(CASE WHEN task.status = '${TaskStatus.FAILED}' THEN 1 ELSE 0 END) * 1.0 / COUNT(*) * 100`,
@@ -125,9 +144,34 @@ export class DashboardService {
         .andWhere('task.status IN (:...statuses)', {
           statuses: [TaskStatus.COMPLETED, TaskStatus.FAILED],
         })
+        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
         .groupBy('CAST(task.executedAt AS DATE)')
         .orderBy('CAST(task.executedAt AS DATE)', 'ASC')
         .getRawMany(),
+      this.reportTypeRepository
+        .createQueryBuilder('rt')
+        .select('rt.frequency', 'frequency')
+        .addSelect('COUNT(r.id)', 'count')
+        .leftJoin('rt.reports', 'r')
+        .where(userId ? 'r.userId = :userId' : '1=1', userId ? { userId } : {})
+        .groupBy('rt.frequency')
+        .getRawMany(),
+      this.connectionRepository
+        .createQueryBuilder('c')
+        .select('c.databaseType', 'databaseType')
+        .addSelect('COUNT(*)', 'count')
+        .where(userId ? 'c.userId = :userId' : '1=1', userId ? { userId } : {})
+        .groupBy('c.databaseType')
+        .getRawMany(),
+      this.taskRepository.find({
+        where: userId ? { report: { userId } } : {},
+        order: { executedAt: 'DESC' },
+        relations: ['report'],
+        take: 10,
+      }),
+      this.taskRepository.count({
+        where: userId ? { report: { userId } } : {},
+      }),
     ]);
 
     const completedTasks = this.getStatusCount(
@@ -189,6 +233,28 @@ export class DashboardService {
       errorRate: Math.round(Number(r.errorRate) * 10) / 10,
     }));
 
+    const reportsByFrequency = reportsByFrequencyRaw
+      .filter((r) => r.frequency !== null && r.frequency !== undefined)
+      .map((r) => ({
+        frequency: typeof r.frequency === 'string' ? r.frequency : Frequency[Number(r.frequency)],
+        count: Number(r.count),
+      }));
+
+    const connectionTypes = connectionTypesRaw
+      .filter((r) => r.databaseType !== null && r.databaseType !== undefined)
+      .map((r) => ({
+        databaseType: typeof r.databaseType === 'string' ? r.databaseType : DatabaseType[Number(r.databaseType)],
+        count: Number(r.count),
+      }));
+
+    const recentExecutions = recentTasks.map((t) => ({
+      id: t.id,
+      reportName: t.report?.name || 'Unknown',
+      status: t.status,
+      duration: t.duration ? `${Math.round(t.duration)} sec` : null,
+      executedAt: t.executedAt?.toISOString() || null,
+    }));
+
     return {
       reportStats: {
         totalReports: totalReports || 0,
@@ -205,12 +271,16 @@ export class DashboardService {
       },
       reportsByType,
       reportsByStatus,
+      reportsByFrequency,
       executionTrends,
       topPerformingReports,
       errorRates,
+      connectionTypes,
+      recentExecutions,
       connectionCount: totalConnections || 0,
       userCount: totalUsers || 0,
       reportTypeCount: totalReportTypes || 0,
+      totalTasks: taskCount || 0,
     };
   }
 

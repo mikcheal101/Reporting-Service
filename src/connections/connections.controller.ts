@@ -19,10 +19,11 @@ import { CreateConnectionRequestDto } from './dto/create-connection.request.dto'
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.CONNECTIONS)
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}

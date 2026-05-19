@@ -28,6 +28,7 @@ export class ConnectionUtils {
         cacheEnabled: connection.cacheEnabled,
         cacheTtl: connection.cacheTtl,
         streamEnabled: connection.streamEnabled,
+        description: connection.description,
       };
     } catch (error) {
       this.logger.error(error.message, error.stack);

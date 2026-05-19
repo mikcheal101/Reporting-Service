@@ -17,10 +17,11 @@ import { CreateReportTypeRequestDto } from './dto/create-report-type.request.dto
 import { UpdateReportTypeRequestDto } from './dto/update-report-type.request.dto';
 import { ReportTypeDto } from './dto/report-type.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.REPORT_TYPES)
 export class ReportTypesController {
   constructor(private readonly reportTypeService: ReportTypesService) {}

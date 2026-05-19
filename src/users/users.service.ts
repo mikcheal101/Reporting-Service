@@ -62,6 +62,12 @@ export class UsersService {
         username,
         isActive: true,
       },
+      relations: {
+        roles: {
+          permissions: true,
+        },
+        permissions: true,
+      },
       select: {
         id: true,
         username: true,

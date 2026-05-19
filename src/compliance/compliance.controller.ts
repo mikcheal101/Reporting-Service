@@ -11,6 +11,7 @@ import {
 import { Request } from 'express';
 import { ComplianceService } from './compliance.service';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import {
   ComplianceCheckResult,
@@ -18,7 +19,7 @@ import {
   ComplianceStandard,
 } from './dto/compliance-report.dto';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller('api/v1/compliance')
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}

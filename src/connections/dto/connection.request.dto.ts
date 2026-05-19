@@ -44,4 +44,8 @@ export abstract class ConnectionRequestDto {
   @IsBoolean()
   @IsOptional()
   streamEnabled?: boolean;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

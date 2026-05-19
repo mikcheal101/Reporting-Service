@@ -9,6 +9,7 @@ import { Task } from 'src/tasks/entity/task.entity';
 import { ReportType } from 'src/report-types/entity/report-types.entity';
 import { Connection } from 'src/connections/entity/connections.entity';
 import { User } from 'src/users/entity/users.entity';
+import { AuditLog } from 'src/audit-log/entity/audit-log.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { User } from 'src/users/entity/users.entity';
       ReportType,
       Connection,
       User,
+      AuditLog,
     ]),
   ],
   controllers: [DashboardController],

@@ -14,4 +14,5 @@ export class ConnectionDto {
   cacheEnabled: boolean;
   cacheTtl: number;
   streamEnabled: boolean;
+  description?: string;
 }

@@ -20,10 +20,11 @@ import AssignRoleDto from './dto/assign-role.dto';
 import AssignPermissionDto from './dto/assign-permission.dto';
 import ChangePasswordDto from './dto/change-password.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
+import { PermissionGuard } from '../auth/guard/permission.guard';
 import { RequirePermission } from '../auth/decorator/require-permission.decorator';
 import { ROUTES, ROUTE_PATHS } from '../common/constants/routes.constant';
 
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 @Controller(ROUTES.USERS)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

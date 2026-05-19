@@ -89,6 +89,7 @@ export class ConnectionsService {
         cacheEnabled: connection.cacheEnabled ?? false,
         cacheTtl: connection.cacheTtl ?? 300,
         streamEnabled: connection.streamEnabled ?? false,
+        description: connection.description,
         userId,
       });
 
