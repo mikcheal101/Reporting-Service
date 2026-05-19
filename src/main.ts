@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { Logger as PinoLogger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(PinoLogger));
 
   app.use(helmet());
   app.useGlobalPipes(
@@ -24,11 +26,14 @@ async function bootstrap() {
   });
   app.use(cookieParser());
 
+  app.enableShutdownHooks();
+
   const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 4050;
 
   await app.listen(port);
 
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`CORS enabled for: ${frontendUrl}`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`CORS enabled for: ${frontendUrl}`);
 }
 bootstrap();
