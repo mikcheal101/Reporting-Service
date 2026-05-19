@@ -56,7 +56,7 @@
 - [x] Profile page at `/profile` — view user info + edit credentials (name, email, phone)
 - [x] Profile link in sidebar (bottom links) and navbar dropdown
 - [x] Settings tabs restyled with pill/toggle buttons + icons (matching scheduled-report style)
-- [x] Dark mode prop scaffolded in Navbar and DataTable (no toggle UI yet)
+- [x] Dark mode prop scaffolded in Navbar and DataTable
 - [x] Responsive mobile layout — collapsible sidebar, responsive tables
 - [x] Loading skeletons (report-type cards, audit-logs table rows)
 - [x] Toast notifications for all CRUD operations — fallback text, no "undefined", no redundant "Error:" prefix (28+ hooks)
@@ -66,9 +66,15 @@
 - [x] All react-icons/fa replaced with lucide-react equivalents
 - [x] Consistent sheet widths (400px view / 480px form / 560px complex)
 - [x] First-time guided tour (Driver.js, 8 steps covering sidebar, dashboard, reports, connections, settings)
-- [ ] Error boundaries per page (React Error Boundary components)
-- [ ] Dark mode toggle (UI switch)
-- [ ] Avatar upload on profile page
+- [x] Security settings page at `/settings/security` — change password, 2FA toggle, login history
+- [x] Integration settings page at `/settings/integration` — API keys, webhooks, third-party integrations
+- [x] User Preferences page at `/settings/user-preference` — language, timezone, theme selector
+- [x] Notification preferences page with state management and save/reset
+- [x] Settings tab bar moved to layout — visible across all settings sub-pages
+- [x] Settings tabs expanded: Users, Security, Notifications, Integration, User Preferences, System, Audit Logs
+- [x] Error boundaries per page (React Error Boundary components)
+- [x] Dark mode toggle (UI switch in Navbar, ThemeProvider wired in root layout)
+- [x] Avatar upload on profile page (UI with preview + file picker; backend endpoint pending)
 
 ## Phase 6: Finance & Insurance Features
 - [ ] PCI-DSS compliant data handling
