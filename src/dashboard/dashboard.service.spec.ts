@@ -29,9 +29,13 @@ describe('DashboardService', () => {
   const mockTaskRepository = {
     count: jest.fn(),
     findOne: jest.fn(),
+    find: jest.fn(),
     createQueryBuilder: jest.fn(),
   };
-  const mockConnectionRepository = { count: jest.fn() };
+  const mockConnectionRepository = {
+    count: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
   const mockUserRepository = { count: jest.fn() };
   const mockReportTypeRepository = {
     count: jest.fn(),
@@ -56,8 +60,13 @@ describe('DashboardService', () => {
     mockUserRepository.count.mockResolvedValue(0);
     mockReportTypeRepository.count.mockResolvedValue(0);
     mockTaskRepository.findOne.mockResolvedValue(null);
+    mockTaskRepository.find.mockResolvedValue([]);
+    mockTaskRepository.count.mockResolvedValue(0);
     mockTaskRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder([]));
     mockReportTypeRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder([]),
+    );
+    mockConnectionRepository.createQueryBuilder.mockReturnValue(
       mockQueryBuilder([]),
     );
 

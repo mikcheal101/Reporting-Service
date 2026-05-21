@@ -33,6 +33,7 @@ import { DbPoolMonitorModule } from './observability/db-pool-monitor/db-pool-mon
 import { TracingModule } from './observability/tracing/tracing.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { CacheModule } from './common/cache/cache.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { CacheModule } from './common/cache/cache.module';
     CacheModule,
     TracingModule,
     ComplianceModule,
+    WebsocketModule,
   ],
   controllers: [AppController, RolesController, PermissionsController],
   providers: [

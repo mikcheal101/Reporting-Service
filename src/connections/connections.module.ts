@@ -5,11 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CryptoModule } from 'src/common/security/crypto/crypto.module';
 import { Connection } from './entity/connections.entity';
 import { ConnectionUtils } from './utils/connection.utils';
+import { QueryAnalyzerService } from './query-analyzer.service';
+import { ConnectionPoolService } from './connection-pool.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Connection]), CryptoModule],
-  providers: [ConnectionsService, ConnectionUtils],
+  providers: [ConnectionsService, ConnectionUtils, QueryAnalyzerService, ConnectionPoolService],
   controllers: [ConnectionsController],
-  exports: [ConnectionsService],
+  exports: [ConnectionsService, ConnectionPoolService],
 })
 export class ConnectionsModule {}

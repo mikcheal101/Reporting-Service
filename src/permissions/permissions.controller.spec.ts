@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionsController } from './permissions.controller';
 import { PermissionsService } from './permissions.service';
 import PermissionDto from 'src/users/dto/permission.dto';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('PermissionsController', () => {
   let controller: PermissionsController;
@@ -28,7 +29,7 @@ describe('PermissionsController', () => {
           useValue: mockPermissionsService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<PermissionsController>(PermissionsController);
     permissionsService = module.get<PermissionsService>(PermissionsService);

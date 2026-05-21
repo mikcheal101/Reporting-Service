@@ -5,6 +5,7 @@ import { CreateReportTypeRequestDto } from './dto/create-report-type.request.dto
 import { UpdateReportTypeRequestDto } from './dto/update-report-type.request.dto';
 import { Frequency } from './entity/frequency.enum';
 import { OutputFormat } from 'src/common/exporters/output-format.enum';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('ReportTypesController', () => {
   let controller: ReportTypesController;
@@ -29,7 +30,7 @@ describe('ReportTypesController', () => {
           useValue: mockReportTypesService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<ReportTypesController>(ReportTypesController);
     reportTypesService = module.get<ReportTypesService>(ReportTypesService);

@@ -87,12 +87,12 @@
 - [x] Scheduled compliance audits — compliance check service; `COMPLIANCE_AUDIT_SCHEDULE` cron env var; compliance report generation with 4 standard checks
 
 ## Phase 7: Performance & Scale
-- [ ] Database query result pagination
+- [x] Database query result pagination — `page`/`limit` params on `GET /api/v1/connections` and `GET /api/v1/reports` with `findAndCount` + `skip`/`take`
 - [x] Async report execution (queued jobs via TasksModule)
-- [ ] WebSocket-based live query results
-- [ ] Connection pool per database type
-- [ ] Query plan analysis
-- [ ] Database indexing recommendations
+- [x] WebSocket-based live query results — `WebsocketModule` with `QueryGateway` (Socket.IO, `/query-stream` namespace) + `QueryStreamService`; cancel support via `AbortController`
+- [x] Connection pool per database type — `ConnectionPoolService` with pool lifecycle tracking, idle drain (30 min), and per-connection-type keying
+- [x] Query plan analysis — `QueryAnalyzerService.generateExplainQuery` (per-dialect), `ConnectionsService.analyzeQueryPlanAsync` runs EXPLAIN against live DB
+- [x] Database indexing recommendations — `QueryAnalyzerService.generateIndexingRecommendations` detects seq scans, missing indexes, sort ops, temp tables
 
 ## Phase 8: Documentation & DevOps
 - [ ] Architecture documentation (`/arch`)
@@ -103,6 +103,13 @@
 - [ ] Database migration strategy
 - [ ] Load testing plan
 - [ ] Disaster recovery plan
+
+## Phase 9: Sales and Marketting (Local - Yaba)
+- [ ] Search for financial companies within the yaba, gbagada axis in lagos state.
+- [ ] Get the email addreses and contact info that we can send a sales pitch to
+- [ ] Create a perfect sales email that we can send to sell this app
+- [ ] Create a folder called /emails and store the emails to be sent to the prospective clients
+
 
 ## Legend
 - [x] = Done

@@ -19,6 +19,7 @@ import { ConnectionTablesResponseDto } from './dto/connection-tables.response.dt
 import { ConnectionDto } from './dto/connection.dto';
 import { ConnectionUtils } from './utils/connection.utils';
 import { ERRORS } from '../common/constants/error-messages.constant';
+import { QueryAnalyzerService } from './query-analyzer.service';
 
 @Injectable()
 export class ConnectionsService {
@@ -30,6 +31,7 @@ export class ConnectionsService {
     private readonly connectionUtils: ConnectionUtils,
     private readonly cryptoService: CryptoService,
     private readonly queryCache: QueryCacheService,
+    private readonly queryAnalyzerService: QueryAnalyzerService,
   ) {
     this.logger = new Logger(ConnectionsService.name);
   }
@@ -46,8 +48,38 @@ export class ConnectionsService {
     }
   };
 
-  public connectionsAsync = async (userId?: number): Promise<Connection[]> => {
+  public connectionsAsync = async (
+    userId?: number,
+    page?: number,
+    limit?: number,
+  ): Promise<Connection[] | { data: Connection[]; meta: any }> => {
     try {
+      const where = userId ? { userId } : {};
+      if (page !== undefined && limit !== undefined) {
+        const p = page > 0 ? page : 1;
+        const l = limit > 0 ? Math.min(limit, 100) : 20;
+        const [conns, total] = await this.connectionsRepository.findAndCount({
+          where,
+          skip: (p - 1) * l,
+          take: l,
+        });
+        const decrypted = conns.map((connection) => {
+          connection.password = this.cryptoService.decrypt(connection.password);
+          return connection;
+        });
+        const totalPages = Math.ceil(total / l) || 1;
+        return {
+          data: decrypted,
+          meta: {
+            total,
+            page: p,
+            limit: l,
+            totalPages,
+            hasNextPage: p < totalPages,
+            hasPreviousPage: p > 1,
+          },
+        };
+      }
       let conns = userId
         ? await this.connectionsRepository.findBy({ userId })
         : await this.connectionsRepository.find();
@@ -245,5 +277,49 @@ export class ConnectionsService {
     } finally {
       await adapter.closeAsync();
     }
+  };
+
+  public analyzeQueryPlanAsync = async (
+    id: number,
+    query: string,
+    userId?: number,
+  ) => {
+    const where: any = { id };
+    if (userId) where.userId = userId;
+    const connection = await this.connectionsRepository.findOneBy(where);
+    if (!connection) throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
+
+    const dbType = connection.databaseType;
+    const explainQuery = this.queryAnalyzerService.generateExplainQuery(query, dbType);
+
+    const adapter = DatabaseFactory.create({
+      name: connection.name,
+      database: connection.database,
+      databaseType: dbType,
+      password: this.cryptoService.decrypt(connection.password),
+      port: connection.port,
+      server: connection.server,
+      user: connection.user,
+    });
+
+    try {
+      await adapter.connectAsync();
+      const explainResult = await adapter.queryAsync(explainQuery, undefined, connection.queryTimeout || 60000);
+      return this.queryAnalyzerService.analyzePlan(query, dbType, explainResult);
+    } catch (error) {
+      this.logger.error(`Query plan analysis failed: ${error.message}`);
+      return this.queryAnalyzerService.analyzePlan(query, dbType, null);
+    } finally {
+      await adapter.closeAsync();
+    }
+  };
+
+  public getIndexingRecommendationsAsync = async (
+    id: number,
+    query: string,
+    userId?: number,
+  ) => {
+    const analysis = await this.analyzeQueryPlanAsync(id, query, userId);
+    return this.queryAnalyzerService.generateIndexingRecommendations(analysis);
   };
 }

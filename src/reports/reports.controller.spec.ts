@@ -10,6 +10,7 @@ import { ReportDto } from './dto/report.dto';
 import { DatabaseType } from 'src/connections/databasetype.enum';
 import { OutputFormat } from 'src/common/exporters/output-format.enum';
 import { Frequency } from 'src/report-types/entity/frequency.enum';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 const mockRequest = { user: { id: 1 } } as any;
 
@@ -27,6 +28,10 @@ describe('ReportsController', () => {
     database: 'testdb',
     databaseType: DatabaseType.MSSQL,
     isTestSuccessful: true,
+    queryTimeout: 60,
+    cacheEnabled: false,
+    cacheTtl: 300,
+    streamEnabled: false,
   };
 
   const mockFullReportTypeDto = {
@@ -78,7 +83,7 @@ describe('ReportsController', () => {
           useValue: { verifyAsync: jest.fn(), signAsync: jest.fn() },
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<ReportsController>(ReportsController);
     reportsService = module.get<ReportsService>(ReportsService);
