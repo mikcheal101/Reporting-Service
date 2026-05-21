@@ -4,6 +4,7 @@ import { RolesService } from './roles.service';
 import CreateRoleDto from 'src/users/dto/create-role.dto';
 import UpdateRoleDto from 'src/users/dto/update-role.dto';
 import { RoleDto } from 'src/users/dto/role.dto';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('RolesController', () => {
   let controller: RolesController;
@@ -35,7 +36,7 @@ describe('RolesController', () => {
           useValue: mockRolesService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<RolesController>(RolesController);
     rolesService = module.get<RolesService>(RolesService);

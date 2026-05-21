@@ -72,8 +72,28 @@ export class ReportsService {
     }
   };
 
-  public fetchAllAsync = async (userId?: number): Promise<ReportDto[]> => {
+  public fetchAllAsync = async (
+    userId?: number,
+    page?: number,
+    limit?: number,
+  ): Promise<ReportDto[] | { data: ReportDto[]; meta: any }> => {
     try {
+      const where = userId ? { userId } : {};
+      if (page !== undefined && limit !== undefined) {
+        const p = page > 0 ? page : 1;
+        const l = limit > 0 ? Math.min(limit, 100) : 20;
+        const [reports, total] = await this.reportRepository.findAndCount({
+          where,
+          skip: (p - 1) * l,
+          take: l,
+        });
+        const data = reports.map((r) => this.reportUtils.convertToDto(r));
+        const totalPages = Math.ceil(total / l) || 1;
+        return {
+          data,
+          meta: { total, page: p, limit: l, totalPages, hasNextPage: p < totalPages, hasPreviousPage: p > 1 },
+        };
+      }
       const reports = userId
         ? await this.reportRepository.findBy({ userId })
         : await this.reportRepository.find();

@@ -75,6 +75,13 @@ describe('PermissionSeed', () => {
       'user.create',
       'audit-log.view',
       'audit-log.list',
+      'audit-log.delete',
+      'compliance-report.view',
+      'compliance-report.list',
+      'compliance-report.create',
+      'compliance-report.delete',
+      'data-retention.view',
+      'data-retention.update',
     ];
 
     mockFind.mockResolvedValue(allPermissions.map((name) => ({ name })));

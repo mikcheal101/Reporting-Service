@@ -16,6 +16,7 @@ import { DatabaseFactory } from 'src/connections/database.factory';
 import { DatabaseType } from 'src/connections/databasetype.enum';
 import { OutputFormat } from 'src/common/exporters/output-format.enum';
 import { Frequency } from 'src/report-types/entity/frequency.enum';
+import { QueryCacheService } from 'src/common/cache/query-cache.service';
 
 describe('ReportsService', () => {
   let service: ReportsService;
@@ -66,10 +67,14 @@ describe('ReportsService', () => {
     server: 'localhost',
     port: 1433,
     user: 'sa',
-    password: 'decryptedPassword',
+    password: 'password',
     database: 'testdb',
     databaseType: DatabaseType.MSSQL,
     isTestSuccessful: true,
+    queryTimeout: 60,
+    cacheEnabled: false,
+    cacheTtl: 300,
+    streamEnabled: false,
   };
 
   const mockFullReportTypeDto = {
@@ -163,6 +168,16 @@ describe('ReportsService', () => {
         {
           provide: ReportUtils,
           useValue: mockReportUtils,
+        },
+        {
+          provide: QueryCacheService,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn(),
+            buildKey: jest.fn(),
+            getStats: jest.fn(),
+          },
         },
       ],
     }).compile();

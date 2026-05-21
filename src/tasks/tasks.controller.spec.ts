@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { ScheduleTaskRequestDto } from './dto/schedule-task.request.dto';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('TasksController', () => {
   let controller: TasksController;
@@ -25,7 +26,7 @@ describe('TasksController', () => {
           useValue: mockTasksService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<TasksController>(TasksController);
     tasksService = module.get<TasksService>(TasksService);

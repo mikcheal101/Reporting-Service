@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuditLogController } from './audit-log.controller';
 import { AuditLogService } from './audit-log.service';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('AuditLogController', () => {
   let controller: AuditLogController;
@@ -20,7 +21,7 @@ describe('AuditLogController', () => {
           useValue: mockService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<AuditLogController>(AuditLogController);
     service = module.get<AuditLogService>(AuditLogService);

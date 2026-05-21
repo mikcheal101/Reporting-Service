@@ -28,6 +28,10 @@ describe('TasksService', () => {
     database: 'testdb',
     databaseType: DatabaseType.MSSQL,
     isTestSuccessful: true,
+    queryTimeout: 60,
+    cacheEnabled: false,
+    cacheTtl: 300,
+    streamEnabled: false,
   };
 
   const mockFullReportTypeDto = {

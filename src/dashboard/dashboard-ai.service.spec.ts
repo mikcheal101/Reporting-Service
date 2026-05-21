@@ -6,6 +6,7 @@ import { Task } from 'src/tasks/entity/task.entity';
 import { ReportDetail } from 'src/reports/entity/report-detail.entity';
 import { Connection } from 'src/connections/entity/connections.entity';
 import { ReportType } from 'src/report-types/entity/report-types.entity';
+import { AuditLog } from 'src/audit-log/entity/audit-log.entity';
 
 const mockQueryBuilder = (returnValue: any) => ({
   leftJoin: jest.fn().mockReturnThis(),
@@ -39,6 +40,11 @@ describe('DashboardAiService', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockAuditLogRepository = {
+    count: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -51,6 +57,10 @@ describe('DashboardAiService', () => {
     );
     mockReportRepository.find.mockResolvedValue([]);
     mockConnectionRepository.find.mockResolvedValue([]);
+    mockAuditLogRepository.count.mockResolvedValue(0);
+    mockAuditLogRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder([]),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -63,6 +73,10 @@ describe('DashboardAiService', () => {
           useValue: mockConnectionRepository,
         },
         { provide: getRepositoryToken(ReportType), useValue: {} },
+        {
+          provide: getRepositoryToken(AuditLog),
+          useValue: mockAuditLogRepository,
+        },
       ],
     }).compile();
 

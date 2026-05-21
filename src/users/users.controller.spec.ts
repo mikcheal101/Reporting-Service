@@ -6,6 +6,7 @@ import CreateUserDto from './dto/create-user.dto';
 import UpdateUserDto from './dto/update-user.dto';
 import AssignRoleDto from './dto/assign-role.dto';
 import AssignPermissionDto from './dto/assign-permission.dto';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -46,7 +47,7 @@ describe('UsersController', () => {
           useValue: mockUsersService,
         },
       ],
-    }).compile();
+    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
 
     controller = module.get<UsersController>(UsersController);
     usersService = module.get<UsersService>(UsersService);

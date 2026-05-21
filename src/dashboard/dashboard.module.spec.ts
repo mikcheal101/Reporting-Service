@@ -10,6 +10,8 @@ import { Task } from 'src/tasks/entity/task.entity';
 import { ReportType } from 'src/report-types/entity/report-types.entity';
 import { Connection } from 'src/connections/entity/connections.entity';
 import { User } from 'src/users/entity/users.entity';
+import { AuditLog } from 'src/audit-log/entity/audit-log.entity';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
 
 describe('DashboardModule', () => {
   it('should compile the module', async () => {
@@ -28,6 +30,10 @@ describe('DashboardModule', () => {
       .useValue({})
       .overrideProvider(getRepositoryToken(User))
       .useValue({})
+      .overrideProvider(getRepositoryToken(AuditLog))
+      .useValue({})
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     expect(module).toBeDefined();

@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
 import { ConnectionsService } from './connections.service';
 import { Connection } from './entity/connections.entity';
 import { ConnectionUtils } from './utils/connection.utils';
+import { QueryAnalyzerService } from './query-analyzer.service';
 import { CryptoService } from 'src/common/security/crypto/crypto.service';
+import { QueryCacheService } from 'src/common/cache/query-cache.service';
 import { CreateConnectionRequestDto } from './dto/create-connection.request.dto';
 import { UpdateConnectionRequestDto } from './dto/update-connection.request.dto';
 import { TestConnectionRequestDto } from './dto/test-connection.request.dto';
@@ -64,6 +66,12 @@ describe('ConnectionsService', () => {
     decrypt: jest.fn(),
   };
 
+  const mockQueryAnalyzerService = {
+    generateExplainQuery: jest.fn(),
+    analyzePlan: jest.fn(),
+    generateIndexingRecommendations: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -81,6 +89,20 @@ describe('ConnectionsService', () => {
         {
           provide: CryptoService,
           useValue: mockCryptoService,
+        },
+        {
+          provide: QueryAnalyzerService,
+          useValue: mockQueryAnalyzerService,
+        },
+        {
+          provide: QueryCacheService,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            invalidate: jest.fn(),
+            buildKey: jest.fn(),
+            getStats: jest.fn(),
+          },
         },
       ],
     }).compile();

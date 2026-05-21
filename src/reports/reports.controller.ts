@@ -12,6 +12,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -60,9 +61,17 @@ export class ReportsController {
   @RequirePermission('report.list')
   @HttpCode(HttpStatus.OK)
   @Get()
-  public async getReports(@Req() request: Request): Promise<ReportDto[]> {
+  public async getReports(
+    @Req() request: Request,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
     try {
-      return await this.reportsService.fetchAllAsync(request.user?.id);
+      return await this.reportsService.fetchAllAsync(
+        request.user?.id,
+        page,
+        limit,
+      );
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);

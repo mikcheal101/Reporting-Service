@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -47,9 +48,17 @@ export class ConnectionsController {
   @HttpCode(HttpStatus.OK)
   @Get()
   @RequirePermission('connection.list')
-  public async getConnections(@Req() request: Request) {
+  public async getConnections(
+    @Req() request: Request,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
     try {
-      return await this.connectionsService.connectionsAsync(request.user?.id);
+      return await this.connectionsService.connectionsAsync(
+        request.user?.id,
+        page,
+        limit,
+      );
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
@@ -119,6 +128,46 @@ export class ConnectionsController {
     try {
       return this.connectionsService.getConnectionTablesAsync(
         Number.parseInt(id),
+        request.user?.id,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('query-plan/:id')
+  @RequirePermission('connection.view')
+  public async getQueryPlan(
+    @Param('id') id: string,
+    @Query('query') query: string,
+    @Req() request: Request,
+  ) {
+    try {
+      return await this.connectionsService.analyzeQueryPlanAsync(
+        Number.parseInt(id),
+        query,
+        request.user?.id,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('indexing-recommendations/:id')
+  @RequirePermission('connection.view')
+  public async getIndexingRecommendations(
+    @Param('id') id: string,
+    @Query('query') query: string,
+    @Req() request: Request,
+  ) {
+    try {
+      return await this.connectionsService.getIndexingRecommendationsAsync(
+        Number.parseInt(id),
+        query,
         request.user?.id,
       );
     } catch (error) {
