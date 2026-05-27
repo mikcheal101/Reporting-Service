@@ -104,11 +104,34 @@
 - [ ] Load testing plan
 - [ ] Disaster recovery plan
 
-## Phase 9: Sales and Marketting (Local - Yaba)
-- [ ] Search for financial companies within the yaba, gbagada axis in lagos state.
-- [ ] Get the email addreses and contact info that we can send a sales pitch to
-- [ ] Create a perfect sales email that we can send to sell this app
-- [ ] Create a folder called /emails and store the emails to be sent to the prospective clients
+## Phase 9: Sales and Marketing (Local - Yaba)
+- [x] Search for financial companies within the Yaba, Gbagada axis in Lagos state — identified 19 financial institutions across both locations
+- [x] Get the email addresses and contact info — compiled in `emails/prospects.csv` and `emails/prospects.json` with emails, phones, websites, addresses, and category tags
+- [x] Create a sales email pitch — `emails/sales-email-draft.txt` highlights multi-DB reporting, AI SQL generation, real-time streaming, RBAC, compliance (CBN/NDIC/SEC/NAICOM), and on-premise deployment
+- [x] Create a folder called `/emails` and store the prospect data — `/Users/apple/code/rosabon/emails/`
+
+### Prospects found (Yaba)
+1. Kuda Microfinance Bank — 151 Herbert Macaulay Way — hello@kuda.com
+2. MKOBO Microfinance Bank — 13 Hughes Avenue — info@mkobo.com.ng
+3. UT Financial Services — 11 Maye Street — +234-1-2900626
+4. Custodian Investment Plc — 16A Commercial Avenue — enquiries@custodianplc.com.ng
+5. CredPal — 252 Herbert Macaulay Way (YC W19)
+6. LifeBank — 294 Herbert Macaulay Road
+7. Parkway — 295 Herbert Macaulay Way
+8. ProDevs — 10 Hughes Avenue — business@prodevs.io
+9. LAPO Microfinance Bank — 15 Ikorodu Road, Maryland — info@lapo-nigeria.org
+10. Flutterwave — Yaba tech cluster presence
+
+### Prospects found (Gbagada)
+11. CFS Finance Company Ltd — 23 Oguntona Crescent — Info@cfsfin.com
+12. Amegy Microfinance Bank — 1 Paul Odulaja Crescent
+13. UBA Bank — 285 Gbagada Expressway — cfc@ubagroup.com
+14. NeoLife Nigeria — Gbagada Industrial Estate — Info.Lagos@ng.neolife.com
+15. DataMax Registrars — 2C Gbagada Expressway
+16. Financial Inclusion Platform — 20a Lanre Awolokun Road — info@financialinclusionplatform.com
+17. Noor Takaful — 170 Gbagada Expressway — help@noortakaful.ng
+18. Reliance Health — 32 Lanre Awolokun Street
+19. International Facilities Services — 5A Eunice College Close — info@ifs-ng.com
 
 
 ## Legend
