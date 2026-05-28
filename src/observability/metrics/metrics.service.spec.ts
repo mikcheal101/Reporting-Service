@@ -24,11 +24,15 @@ describe('MetricsService', () => {
   });
 
   it('should increment http requests counter', () => {
-    expect(() => service.incrementHttpRequests('GET', '/api/v1/health', 200)).not.toThrow();
+    expect(() =>
+      service.incrementHttpRequests('GET', '/api/v1/health', 200),
+    ).not.toThrow();
   });
 
   it('should observe http request duration', () => {
-    expect(() => service.observeHttpRequestDuration('GET', '/api/v1/health', 0.1)).not.toThrow();
+    expect(() =>
+      service.observeHttpRequestDuration('GET', '/api/v1/health', 0.1),
+    ).not.toThrow();
   });
 
   it('should set db pool metrics', () => {

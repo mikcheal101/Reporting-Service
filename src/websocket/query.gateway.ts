@@ -50,15 +50,26 @@ export class QueryGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.activeStreams.set(client.id, abortController);
 
     try {
-      client.emit('queryStatus', { status: 'running', message: 'Connecting to database...' });
+      client.emit('queryStatus', {
+        status: 'running',
+        message: 'Connecting to database...',
+      });
 
-      const connection = await this.queryStreamService.getConnection(message.connectionId);
+      const connection = await this.queryStreamService.getConnection(
+        message.connectionId,
+      );
       if (!connection) {
-        client.emit('queryError', { status: 'error', message: 'Connection not found' });
+        client.emit('queryError', {
+          status: 'error',
+          message: 'Connection not found',
+        });
         return;
       }
 
-      client.emit('queryStatus', { status: 'running', message: 'Executing query...' });
+      client.emit('queryStatus', {
+        status: 'running',
+        message: 'Executing query...',
+      });
 
       const result = await this.queryStreamService.executeQuery(
         connection,
@@ -77,9 +88,15 @@ export class QueryGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     } catch (error) {
       if (abortController.signal.aborted) {
-        client.emit('queryStatus', { status: 'cancelled', message: 'Query cancelled' });
+        client.emit('queryStatus', {
+          status: 'cancelled',
+          message: 'Query cancelled',
+        });
       } else {
-        client.emit('queryError', { status: 'error', message: error.message || 'Query execution failed' });
+        client.emit('queryError', {
+          status: 'error',
+          message: error.message || 'Query execution failed',
+        });
       }
     } finally {
       this.activeStreams.delete(client.id);
@@ -92,7 +109,10 @@ export class QueryGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (abort) {
       abort.abort();
       this.activeStreams.delete(client.id);
-      client.emit('queryStatus', { status: 'cancelled', message: 'Query cancelled' });
+      client.emit('queryStatus', {
+        status: 'cancelled',
+        message: 'Query cancelled',
+      });
     }
   }
 }

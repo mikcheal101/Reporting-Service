@@ -27,6 +27,7 @@ export const ROUTE_PATHS = {
   TABLES: ':id/tables',
   ID: ':id',
   PENDING_TASKS: 'pending-tasks',
+  SCHEDULED_TASKS: 'scheduled-tasks',
   COMPLETED_TASKS: 'completed-tasks',
   DOWNLOAD_REPORT: 'download-report/:id',
 } as const;

@@ -54,6 +54,18 @@ export class TasksController {
 
   @RequirePermission('task.list')
   @HttpCode(HttpStatus.OK)
+  @Get(ROUTE_PATHS.SCHEDULED_TASKS)
+  public async scheduledTasks(): Promise<Task[]> {
+    try {
+      return await this.tasksService.fetchScheduledTasksAsync();
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @RequirePermission('task.list')
+  @HttpCode(HttpStatus.OK)
   @Get(ROUTE_PATHS.COMPLETED_TASKS)
   public async completedTasks(): Promise<Task[]> {
     try {

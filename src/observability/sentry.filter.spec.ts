@@ -33,7 +33,9 @@ describe('SentryFilter', () => {
     const mockJson = jest.fn();
     const mockStatus = jest.fn().mockReturnValue({ json: mockJson });
     const mockGetResponse = jest.fn().mockReturnValue({ status: mockStatus });
-    const mockGetRequest = jest.fn().mockReturnValue({ url: '/test', method: 'GET', body: {} });
+    const mockGetRequest = jest
+      .fn()
+      .mockReturnValue({ url: '/test', method: 'GET', body: {} });
     const host = {
       switchToHttp: () => ({
         getResponse: mockGetResponse,
@@ -41,7 +43,10 @@ describe('SentryFilter', () => {
       }),
     };
 
-    filter.catch(new HttpException('Not Found', HttpStatus.NOT_FOUND), host as any);
+    filter.catch(
+      new HttpException('Not Found', HttpStatus.NOT_FOUND),
+      host as any,
+    );
 
     expect(mockStatus).toHaveBeenCalledWith(404);
     expect(mockJson).toHaveBeenCalledWith(

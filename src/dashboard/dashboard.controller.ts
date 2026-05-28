@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { DashboardAiService } from './dashboard-ai.service';
 import { AuthGuard } from '../auth/guard/auth.guard';

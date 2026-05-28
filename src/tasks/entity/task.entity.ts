@@ -18,7 +18,7 @@ export class Task {
   @Column({ nullable: false })
   name: string;
 
-  @OneToOne(() => Report, (report) => report.task)
+  @OneToOne(() => Report, (report) => report.task, { onDelete: 'CASCADE' })
   @JoinColumn()
   report: Report;
 

@@ -35,7 +35,10 @@ function maskValue(value: any, columnName: string): any {
       return str[0] + '***' + str.slice(at - 1);
     }
   }
-  if (/credit[-_]?card/i.test(columnName) || /card[-_]?number/i.test(columnName)) {
+  if (
+    /credit[-_]?card/i.test(columnName) ||
+    /card[-_]?number/i.test(columnName)
+  ) {
     const digits = str.replace(/\D/g, '');
     if (digits.length >= 4) {
       return '****-****-****-' + digits.slice(-4);

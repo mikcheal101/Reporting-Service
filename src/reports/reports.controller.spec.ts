@@ -83,7 +83,10 @@ describe('ReportsController', () => {
           useValue: { verifyAsync: jest.fn(), signAsync: jest.fn() },
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ReportsController>(ReportsController);
     reportsService = module.get<ReportsService>(ReportsService);
@@ -114,9 +117,9 @@ describe('ReportsController', () => {
         new Error('Creation failed'),
       );
 
-      await expect(controller.saveReport(createDto, mockRequest)).rejects.toThrow(
-        'Creation failed',
-      );
+      await expect(
+        controller.saveReport(createDto, mockRequest),
+      ).rejects.toThrow('Creation failed');
     });
   });
 
@@ -134,7 +137,9 @@ describe('ReportsController', () => {
         new Error('Fetch failed'),
       );
 
-      await expect(controller.getReports(mockRequest)).rejects.toThrow('Fetch failed');
+      await expect(controller.getReports(mockRequest)).rejects.toThrow(
+        'Fetch failed',
+      );
     });
   });
 
@@ -160,7 +165,10 @@ describe('ReportsController', () => {
 
       await controller.testQuery(queryDto, mockRequest, mockResponse);
 
-      expect(mockReportsService.testQueryAsync).toHaveBeenCalledWith(queryDto, 1);
+      expect(mockReportsService.testQueryAsync).toHaveBeenCalledWith(
+        queryDto,
+        1,
+      );
       expect(mockResponse.status).toHaveBeenCalledWith(200);
     });
   });
@@ -218,9 +226,9 @@ describe('ReportsController', () => {
         new Error('AI failed'),
       );
 
-      await expect(controller.generateQueryViaAI(aiDto, mockRequest)).rejects.toThrow(
-        'AI failed',
-      );
+      await expect(
+        controller.generateQueryViaAI(aiDto, mockRequest),
+      ).rejects.toThrow('AI failed');
     });
   });
 
@@ -246,9 +254,9 @@ describe('ReportsController', () => {
         new Error('Failed'),
       );
 
-      await expect(controller.getReportParameters('1', mockRequest)).rejects.toThrow(
-        'Failed',
-      );
+      await expect(
+        controller.getReportParameters('1', mockRequest),
+      ).rejects.toThrow('Failed');
     });
   });
 
@@ -265,7 +273,9 @@ describe('ReportsController', () => {
     it('should throw BadRequestException on error', async () => {
       mockReportsService.findOneAsync.mockRejectedValue(new Error('Not found'));
 
-      await expect(controller.getReport('999', mockRequest)).rejects.toThrow('Not found');
+      await expect(controller.getReport('999', mockRequest)).rejects.toThrow(
+        'Not found',
+      );
     });
   });
 
@@ -282,7 +292,11 @@ describe('ReportsController', () => {
       const result = await controller.updateReport('1', updateDto, mockRequest);
 
       expect(result).toEqual(mockReportDto);
-      expect(mockReportsService.updateAsync).toHaveBeenCalledWith(1, updateDto, 1);
+      expect(mockReportsService.updateAsync).toHaveBeenCalledWith(
+        1,
+        updateDto,
+        1,
+      );
     });
 
     it('should throw BadRequestException on error', async () => {
@@ -290,9 +304,9 @@ describe('ReportsController', () => {
         new Error('Update failed'),
       );
 
-      await expect(controller.updateReport('1', updateDto, mockRequest)).rejects.toThrow(
-        'Update failed',
-      );
+      await expect(
+        controller.updateReport('1', updateDto, mockRequest),
+      ).rejects.toThrow('Update failed');
     });
   });
 

@@ -21,7 +21,10 @@ describe('AuditLogController', () => {
           useValue: mockService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<AuditLogController>(AuditLogController);
     service = module.get<AuditLogService>(AuditLogService);
@@ -35,7 +38,15 @@ describe('AuditLogController', () => {
     const mockResult = { data: [], total: 0 };
     mockService.findAllAsync.mockResolvedValue(mockResult);
 
-    const result = await controller.findAll('users', 'POST', undefined, undefined, undefined, 1, 20);
+    const result = await controller.findAll(
+      'users',
+      'POST',
+      undefined,
+      undefined,
+      undefined,
+      1,
+      20,
+    );
     expect(result).toEqual(mockResult);
     expect(mockService.findAllAsync).toHaveBeenCalledWith({
       entity: 'users',
@@ -52,7 +63,15 @@ describe('AuditLogController', () => {
     mockService.findAllAsync.mockRejectedValue(new Error('Fetch failed'));
 
     await expect(
-      controller.findAll(undefined, undefined, undefined, undefined, undefined, 1, 20),
+      controller.findAll(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1,
+        20,
+      ),
     ).rejects.toThrow('Fetch failed');
   });
 

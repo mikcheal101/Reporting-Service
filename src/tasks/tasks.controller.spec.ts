@@ -26,7 +26,10 @@ describe('TasksController', () => {
           useValue: mockTasksService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<TasksController>(TasksController);
     tasksService = module.get<TasksService>(TasksService);

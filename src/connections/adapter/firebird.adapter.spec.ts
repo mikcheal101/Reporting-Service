@@ -47,7 +47,9 @@ describe('FirebirdAdapter', () => {
       });
 
       const adapter = new FirebirdAdapter(connectionDto);
-      await expect(adapter.connectAsync()).rejects.toThrow('Connection refused');
+      await expect(adapter.connectAsync()).rejects.toThrow(
+        'Connection refused',
+      );
     });
   });
 
@@ -102,7 +104,9 @@ describe('FirebirdAdapter', () => {
       const adapter = new FirebirdAdapter(connectionDto);
       (adapter as any).connection = mockDb;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Query failed');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Query failed',
+      );
     });
 
     it('should throw DatabaseDeadLockError on code 335544345', async () => {
@@ -115,7 +119,9 @@ describe('FirebirdAdapter', () => {
       const adapter = new FirebirdAdapter(connectionDto);
       (adapter as any).connection = mockDb;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
 
     it('should throw DatabaseDeadLockError on code 335544336', async () => {
@@ -128,7 +134,9 @@ describe('FirebirdAdapter', () => {
       const adapter = new FirebirdAdapter(connectionDto);
       (adapter as any).connection = mockDb;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
 
     it('should throw DatabaseTimeOutError when timeout fires', async () => {
@@ -164,7 +172,9 @@ describe('FirebirdAdapter', () => {
     });
 
     it('should throw error on close failure', async () => {
-      mockDb.detach = jest.fn((callback) => callback(new Error('Close failed')));
+      mockDb.detach = jest.fn((callback) =>
+        callback(new Error('Close failed')),
+      );
 
       const adapter = new FirebirdAdapter(connectionDto);
       (adapter as any).connection = mockDb;

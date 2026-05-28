@@ -95,7 +95,9 @@ describe('ConnectionsController', () => {
         new Error('Fetch failed'),
       );
 
-      await expect(controller.getConnections(mockRequest)).rejects.toThrow('Fetch failed');
+      await expect(controller.getConnections(mockRequest)).rejects.toThrow(
+        'Fetch failed',
+      );
     });
   });
 
@@ -126,9 +128,9 @@ describe('ConnectionsController', () => {
         new Error('Creation failed'),
       );
 
-      await expect(controller.createConnection(createDto, mockRequest)).rejects.toThrow(
-        'Creation failed',
-      );
+      await expect(
+        controller.createConnection(createDto, mockRequest),
+      ).rejects.toThrow('Creation failed');
     });
   });
 
@@ -142,7 +144,11 @@ describe('ConnectionsController', () => {
         id: 1,
       } as any);
 
-      const result = await controller.updateConnection('1', updateDto, mockRequest);
+      const result = await controller.updateConnection(
+        '1',
+        updateDto,
+        mockRequest,
+      );
 
       expect(result).toEqual({ id: 1 });
       expect(mockConnectionsService.updateConnectionAsync).toHaveBeenCalledWith(
@@ -157,9 +163,9 @@ describe('ConnectionsController', () => {
         new Error('Update failed'),
       );
 
-      await expect(controller.updateConnection('1', updateDto, mockRequest)).rejects.toThrow(
-        'Update failed',
-      );
+      await expect(
+        controller.updateConnection('1', updateDto, mockRequest),
+      ).rejects.toThrow('Update failed');
     });
   });
 
@@ -182,9 +188,9 @@ describe('ConnectionsController', () => {
         new Error('Not found'),
       );
 
-      await expect(controller.getConnection('999', mockRequest)).rejects.toThrow(
-        'Not found',
-      );
+      await expect(
+        controller.getConnection('999', mockRequest),
+      ).rejects.toThrow('Not found');
     });
   });
 
@@ -207,9 +213,9 @@ describe('ConnectionsController', () => {
         new Error('Failed'),
       );
 
-      await expect(controller.getConnectionTables('1', mockRequest)).rejects.toThrow(
-        'Failed',
-      );
+      await expect(
+        controller.getConnectionTables('1', mockRequest),
+      ).rejects.toThrow('Failed');
     });
   });
 
@@ -231,9 +237,9 @@ describe('ConnectionsController', () => {
         new Error('Delete failed'),
       );
 
-      await expect(controller.deleteConnection('1', mockRequest)).rejects.toThrow(
-        'Delete failed',
-      );
+      await expect(
+        controller.deleteConnection('1', mockRequest),
+      ).rejects.toThrow('Delete failed');
     });
   });
 });

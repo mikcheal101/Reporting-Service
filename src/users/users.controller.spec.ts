@@ -47,7 +47,10 @@ describe('UsersController', () => {
           useValue: mockUsersService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<UsersController>(UsersController);
     usersService = module.get<UsersService>(UsersService);

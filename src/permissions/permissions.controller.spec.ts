@@ -29,7 +29,10 @@ describe('PermissionsController', () => {
           useValue: mockPermissionsService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<PermissionsController>(PermissionsController);
     permissionsService = module.get<PermissionsService>(PermissionsService);

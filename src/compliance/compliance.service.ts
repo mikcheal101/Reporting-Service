@@ -37,9 +37,7 @@ export class ComplianceService {
     return Promise.all(standards.map((s) => this.runComplianceCheck(s)));
   }
 
-  async generateReport(
-    userId?: number,
-  ): Promise<ComplianceReportDto> {
+  async generateReport(userId?: number): Promise<ComplianceReportDto> {
     const results = await this.runAllChecks();
     const overallStatus: ComplianceStatus = results.every(
       (r) => r.status === 'compliant',
@@ -57,9 +55,10 @@ export class ComplianceService {
       (sum, r) => sum + r.findings.filter((f) => f.passed).length,
       0,
     );
-    const score = totalFindings > 0
-      ? Math.round((passedFindings / totalFindings) * 100)
-      : 100;
+    const score =
+      totalFindings > 0
+        ? Math.round((passedFindings / totalFindings) * 100)
+        : 100;
 
     return {
       title: `Compliance Audit Report — ${new Date().toISOString().split('T')[0]}`,
@@ -90,7 +89,8 @@ export class ComplianceService {
       },
       {
         category: 'Audit Trail',
-        description: 'All data access and mutations logged via AuditInterceptor',
+        description:
+          'All data access and mutations logged via AuditInterceptor',
         severity: 'high',
         passed: true,
         recommendation: 'Retain audit logs for minimum 12 months',
@@ -107,7 +107,8 @@ export class ComplianceService {
         description: 'Credit card data masked in query results',
         severity: 'high',
         passed: true,
-        recommendation: 'Verify no cardholder data stored in connection databases',
+        recommendation:
+          'Verify no cardholder data stored in connection databases',
       },
       {
         category: 'Transmission Security',
@@ -123,7 +124,12 @@ export class ComplianceService {
 
     return {
       standard: 'PCI-DSS',
-      status: score >= 80 ? 'compliant' : score >= 50 ? 'pending-review' : 'non-compliant',
+      status:
+        score >= 80
+          ? 'compliant'
+          : score >= 50
+            ? 'pending-review'
+            : 'non-compliant',
       checkedAt: new Date().toISOString(),
       findings,
       score,
@@ -141,20 +147,23 @@ export class ComplianceService {
       },
       {
         category: 'Segregation of Duties',
-        description: 'RBAC permissions separate create/update/delete/view roles',
+        description:
+          'RBAC permissions separate create/update/delete/view roles',
         severity: 'high',
         passed: true,
         recommendation: 'Review role assignments for segregation conflicts',
       },
       {
         category: 'Data Integrity',
-        description: 'Financial reports protected by query validation and access controls',
+        description:
+          'Financial reports protected by query validation and access controls',
         severity: 'high',
         passed: true,
       },
       {
         category: 'Change Management',
-        description: 'Report mutations tracked via audit logs with before/after snapshots',
+        description:
+          'Report mutations tracked via audit logs with before/after snapshots',
         severity: 'medium',
         passed: true,
       },
@@ -223,7 +232,8 @@ export class ComplianceService {
       },
       {
         category: 'Availability',
-        description: 'Health checks, graceful shutdown, circuit breaker configured',
+        description:
+          'Health checks, graceful shutdown, circuit breaker configured',
         severity: 'high',
         passed: true,
       },
