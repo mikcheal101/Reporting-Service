@@ -77,8 +77,18 @@ export class UsersService {
         middleName: true,
         phoneNumber: true,
         isActive: true,
-        permissions: true,
-        roles: true,
+        permissions: {
+          id: true,
+          name: true,
+        },
+        roles: {
+          id: true,
+          name: true,
+          permissions: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   };

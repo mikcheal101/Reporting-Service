@@ -91,7 +91,14 @@ export class ReportsService {
         const totalPages = Math.ceil(total / l) || 1;
         return {
           data,
-          meta: { total, page: p, limit: l, totalPages, hasNextPage: p < totalPages, hasPreviousPage: p > 1 },
+          meta: {
+            total,
+            page: p,
+            limit: l,
+            totalPages,
+            hasNextPage: p < totalPages,
+            hasPreviousPage: p > 1,
+          },
         };
       }
       const reports = userId
@@ -135,9 +142,19 @@ export class ReportsService {
     userId?: number,
   ): Promise<boolean> => {
     try {
-      const where: any = { id };
-      if (userId) where.userId = userId;
-      await this.reportRepository.delete(where);
+      const report = await this.reportRepository.findOne({
+        where: { id },
+        relations: { task: true },
+      });
+
+      if (!report) return false;
+      if (userId && report.userId !== userId) return false;
+
+      if (report.task) {
+        await this.reportRepository.manager.getRepository('Task').delete(report.task.id);
+      }
+
+      await this.reportRepository.delete(id);
       return true;
     } catch (error) {
       this.logger.error(error.message, error.stack);

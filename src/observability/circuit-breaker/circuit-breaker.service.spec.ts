@@ -54,7 +54,9 @@ describe('CircuitBreakerService', () => {
 
   it('should reject when the function throws', async () => {
     await expect(
-      service.execute('test-fail', async () => { throw new Error('fail'); }),
+      service.execute('test-fail', async () => {
+        throw new Error('fail');
+      }),
     ).rejects.toThrow('fail');
   });
 

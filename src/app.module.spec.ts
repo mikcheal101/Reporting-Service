@@ -1,12 +1,24 @@
 jest.mock('nestjs-pino', () => ({
   LoggerModule: {
-    forRoot: jest.fn().mockReturnValue({ module: 'LoggerModule', providers: [], exports: [] }),
+    forRoot: jest
+      .fn()
+      .mockReturnValue({ module: 'LoggerModule', providers: [], exports: [] }),
   },
-  Logger: jest.fn().mockImplementation(() => ({ log: jest.fn(), error: jest.fn(), warn: jest.fn() })),
+  Logger: jest.fn().mockImplementation(() => ({
+    log: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  })),
 }));
 
 jest.mock('@opentelemetry/api', () => ({
-  trace: { getTracer: jest.fn().mockReturnValue({ startSpan: jest.fn().mockReturnValue({ end: jest.fn(), setAttribute: jest.fn() }) }) },
+  trace: {
+    getTracer: jest.fn().mockReturnValue({
+      startSpan: jest
+        .fn()
+        .mockReturnValue({ end: jest.fn(), setAttribute: jest.fn() }),
+    }),
+  },
   Span: jest.fn(),
 }));
 

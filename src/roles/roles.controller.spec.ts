@@ -36,7 +36,10 @@ describe('RolesController', () => {
           useValue: mockRolesService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<RolesController>(RolesController);
     rolesService = module.get<RolesService>(RolesService);

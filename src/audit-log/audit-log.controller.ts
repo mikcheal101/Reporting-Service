@@ -76,6 +76,7 @@ export class AuditLogController {
   }
 
   /** Fetch a single audit-log entry by its ID. */
+  @RequirePermission('audit-log.view')
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   public async findOne(

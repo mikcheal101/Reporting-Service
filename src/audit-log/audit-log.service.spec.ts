@@ -115,7 +115,17 @@ describe('AuditLogService', () => {
 
     it('should return paginated audit logs', async () => {
       const logs = [
-        { id: 1, userId: 1, username: 'admin', action: 'POST', entity: 'users', entityId: 5, details: null, ipAddress: '::1', createdAt: new Date() },
+        {
+          id: 1,
+          userId: 1,
+          username: 'admin',
+          action: 'POST',
+          entity: 'users',
+          entityId: 5,
+          details: null,
+          ipAddress: '::1',
+          createdAt: new Date(),
+        },
       ];
       mockQueryBuilder.getManyAndCount.mockResolvedValue([logs, 1]);
 
@@ -143,7 +153,9 @@ describe('AuditLogService', () => {
     });
 
     it('should propagate errors', async () => {
-      mockQueryBuilder.getManyAndCount.mockRejectedValue(new Error('Query failed'));
+      mockQueryBuilder.getManyAndCount.mockRejectedValue(
+        new Error('Query failed'),
+      );
 
       await expect(
         service.findAllAsync({ page: 1, limit: 20 }),
@@ -153,7 +165,17 @@ describe('AuditLogService', () => {
 
   describe('findOneAsync', () => {
     it('should return a single audit log', async () => {
-      const log = { id: 1, userId: 1, username: 'admin', action: 'POST', entity: 'users', entityId: 5, details: null, ipAddress: '::1', createdAt: new Date() };
+      const log = {
+        id: 1,
+        userId: 1,
+        username: 'admin',
+        action: 'POST',
+        entity: 'users',
+        entityId: 5,
+        details: null,
+        ipAddress: '::1',
+        createdAt: new Date(),
+      };
       mockRepository.findOneByOrFail.mockResolvedValue(log);
 
       const result = await service.findOneAsync(1);

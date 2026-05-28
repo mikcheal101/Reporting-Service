@@ -66,7 +66,10 @@ export class DashboardService {
         where: { ...reportWhere, createdAt: Between(firstOfMonth, now) },
       }),
       this.reportRepository.count({
-        where: { ...reportWhere, createdAt: Between(startOfLastMonth, endOfLastMonth) },
+        where: {
+          ...reportWhere,
+          createdAt: Between(startOfLastMonth, endOfLastMonth),
+        },
       }),
       this.connectionRepository.count({ where: connectionWhere }),
       this.userRepository.count(),
@@ -76,7 +79,10 @@ export class DashboardService {
         .leftJoin('task.report', 'report')
         .select('task.status', 'status')
         .addSelect('COUNT(*)', 'count')
-        .where(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
+        .where(
+          userId ? 'report.userId = :userId' : '1=1',
+          userId ? { userId } : {},
+        )
         .groupBy('task.status')
         .getRawMany(),
       this.reportTypeRepository
@@ -103,7 +109,10 @@ export class DashboardService {
         .select('AVG(task.duration)', 'avg')
         .where('task.status = :status', { status: TaskStatus.COMPLETED })
         .andWhere('task.duration IS NOT NULL')
-        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
+        .andWhere(
+          userId ? 'report.userId = :userId' : '1=1',
+          userId ? { userId } : {},
+        )
         .getRawOne(),
       this.taskRepository
         .createQueryBuilder('task')
@@ -115,7 +124,10 @@ export class DashboardService {
         .andWhere('task.status IN (:...statuses)', {
           statuses: [TaskStatus.COMPLETED, TaskStatus.FAILED],
         })
-        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
+        .andWhere(
+          userId ? 'report.userId = :userId' : '1=1',
+          userId ? { userId } : {},
+        )
         .groupBy('CAST(task.executedAt AS DATE)')
         .orderBy('CAST(task.executedAt AS DATE)', 'ASC')
         .getRawMany(),
@@ -127,7 +139,10 @@ export class DashboardService {
         .addSelect('COALESCE(AVG(task.duration), 0)', 'avgTime')
         .where('task.status = :status', { status: TaskStatus.COMPLETED })
         .andWhere('task.duration IS NOT NULL')
-        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
+        .andWhere(
+          userId ? 'report.userId = :userId' : '1=1',
+          userId ? { userId } : {},
+        )
         .groupBy('report.name')
         .orderBy('COUNT(*)', 'DESC')
         .limit(5)
@@ -144,7 +159,10 @@ export class DashboardService {
         .andWhere('task.status IN (:...statuses)', {
           statuses: [TaskStatus.COMPLETED, TaskStatus.FAILED],
         })
-        .andWhere(userId ? 'report.userId = :userId' : '1=1', userId ? { userId } : {})
+        .andWhere(
+          userId ? 'report.userId = :userId' : '1=1',
+          userId ? { userId } : {},
+        )
         .groupBy('CAST(task.executedAt AS DATE)')
         .orderBy('CAST(task.executedAt AS DATE)', 'ASC')
         .getRawMany(),
@@ -236,14 +254,20 @@ export class DashboardService {
     const reportsByFrequency = reportsByFrequencyRaw
       .filter((r) => r.frequency !== null && r.frequency !== undefined)
       .map((r) => ({
-        frequency: typeof r.frequency === 'string' ? r.frequency : Frequency[Number(r.frequency)],
+        frequency:
+          typeof r.frequency === 'string'
+            ? r.frequency
+            : Frequency[Number(r.frequency)],
         count: Number(r.count),
       }));
 
     const connectionTypes = connectionTypesRaw
       .filter((r) => r.databaseType !== null && r.databaseType !== undefined)
       .map((r) => ({
-        databaseType: typeof r.databaseType === 'string' ? r.databaseType : DatabaseType[Number(r.databaseType)],
+        databaseType:
+          typeof r.databaseType === 'string'
+            ? r.databaseType
+            : DatabaseType[Number(r.databaseType)],
         count: Number(r.count),
       }));
 

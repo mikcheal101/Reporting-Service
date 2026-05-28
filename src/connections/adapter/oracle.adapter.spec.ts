@@ -41,7 +41,9 @@ describe('OracleAdapter', () => {
       oracledb.getConnection.mockRejectedValue(new Error('Connection refused'));
 
       const adapter = new OracleAdapter(connectionDto);
-      await expect(adapter.connectAsync()).rejects.toThrow('Connection refused');
+      await expect(adapter.connectAsync()).rejects.toThrow(
+        'Connection refused',
+      );
     });
   });
 
@@ -78,7 +80,10 @@ describe('OracleAdapter', () => {
         active: { type: DatabaseDatatype.BOOLEAN, value: true },
         date: { type: DatabaseDatatype.DATE, value: new Date('2024-01-01') },
       };
-      await adapter.queryAsync('SELECT * FROM users WHERE name = :name', params);
+      await adapter.queryAsync(
+        'SELECT * FROM users WHERE name = :name',
+        params,
+      );
       expect(mockConn.execute).toHaveBeenCalledWith(
         'SELECT * FROM users WHERE name = :name',
         {
@@ -97,7 +102,9 @@ describe('OracleAdapter', () => {
       const adapter = new OracleAdapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Query failed');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Query failed',
+      );
     });
 
     it('should throw DatabaseTimeOutError on ETIMEDOUT', async () => {
@@ -108,7 +115,9 @@ describe('OracleAdapter', () => {
       const adapter = new OracleAdapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database query timed out');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database query timed out',
+      );
     });
 
     it('should throw DatabaseTimeOutError on errorNum 3135', async () => {
@@ -119,7 +128,9 @@ describe('OracleAdapter', () => {
       const adapter = new OracleAdapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database query timed out');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database query timed out',
+      );
     });
 
     it('should throw DatabaseDeadLockError on errorNum 60', async () => {
@@ -130,7 +141,9 @@ describe('OracleAdapter', () => {
       const adapter = new OracleAdapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
   });
 

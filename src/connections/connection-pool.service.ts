@@ -15,7 +15,12 @@ export class ConnectionPoolService {
   private pools = new Map<string, PoolEntry>();
   private readonly maxIdleMinutes = 30;
 
-  getPoolKey(type: DatabaseType, server: string, port: number, database: string): string {
+  getPoolKey(
+    type: DatabaseType,
+    server: string,
+    port: number,
+    database: string,
+  ): string {
     return `${type}-${server}-${port}-${database}`;
   }
 
@@ -50,13 +55,22 @@ export class ConnectionPoolService {
     return this.pools.size;
   }
 
-  getStats(): { key: string; useCount: number; ageMinutes: number; idleMinutes: number }[] {
+  getStats(): {
+    key: string;
+    useCount: number;
+    ageMinutes: number;
+    idleMinutes: number;
+  }[] {
     const now = new Date();
     return Array.from(this.pools.entries()).map(([key, entry]) => ({
       key,
       useCount: entry.useCount,
-      ageMinutes: Math.round((now.getTime() - entry.createdAt.getTime()) / 60000),
-      idleMinutes: Math.round((now.getTime() - entry.lastUsedAt.getTime()) / 60000),
+      ageMinutes: Math.round(
+        (now.getTime() - entry.createdAt.getTime()) / 60000,
+      ),
+      idleMinutes: Math.round(
+        (now.getTime() - entry.lastUsedAt.getTime()) / 60000,
+      ),
     }));
   }
 

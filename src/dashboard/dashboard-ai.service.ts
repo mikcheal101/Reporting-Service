@@ -284,7 +284,16 @@ export class DashboardAiService {
         r.databaseType !== null && r.databaseType !== undefined
           ? typeof r.databaseType === 'string'
             ? r.databaseType
-            : ['MSSQL', 'MySQL', 'Oracle', 'PostgreSQL', 'MariaDB', 'IBMDb2', 'Firebird', 'H2Database'][Number(r.databaseType)] || 'Unknown'
+            : [
+                'MSSQL',
+                'MySQL',
+                'Oracle',
+                'PostgreSQL',
+                'MariaDB',
+                'IBMDb2',
+                'Firebird',
+                'H2Database',
+              ][Number(r.databaseType)] || 'Unknown'
           : 'Unknown';
       return {
         id: `unused-${r.reportId}`,
@@ -300,9 +309,7 @@ export class DashboardAiService {
           `Database type: ${dbType}`,
           `Created: ${createdDate}`,
         ],
-        whatsNeeded: [
-          `No active queries or schedules using this connection`,
-        ],
+        whatsNeeded: [`No active queries or schedules using this connection`],
         requiredActions: [
           `Decide whether to create reports for "${r.reportName}" or remove it`,
         ],
@@ -347,7 +354,12 @@ export class DashboardAiService {
         reportName: r.name,
         role: 'admin',
         analysisType: 'compliance',
-        severity: daysSinceUpdate > 90 ? 'high' : daysSinceUpdate > 60 ? 'medium' : 'low',
+        severity:
+          daysSinceUpdate > 90
+            ? 'high'
+            : daysSinceUpdate > 60
+              ? 'medium'
+              : 'low',
         title: `${r.name} — ${daysSinceUpdate} days since last update`,
         description: `Report "${r.name}" was last updated ${updatedDate} (${daysSinceUpdate} days ago). Created ${createdDate}.`,
         whatsMissing: [
@@ -394,7 +406,16 @@ export class DashboardAiService {
         r.databaseType !== null && r.databaseType !== undefined
           ? typeof r.databaseType === 'string'
             ? r.databaseType
-            : ['MSSQL', 'MySQL', 'Oracle', 'PostgreSQL', 'MariaDB', 'IBMDb2', 'Firebird', 'H2Database'][Number(r.databaseType)] || 'Unknown'
+            : [
+                'MSSQL',
+                'MySQL',
+                'Oracle',
+                'PostgreSQL',
+                'MariaDB',
+                'IBMDb2',
+                'Firebird',
+                'H2Database',
+              ][Number(r.databaseType)] || 'Unknown'
           : 'Unknown';
       return {
         id: `conn-fail-${r.id}`,
@@ -445,9 +466,7 @@ export class DashboardAiService {
       query.andWhere('report.userId = :userId', { userId });
     }
 
-    const result = await query
-      .limit(3)
-      .getRawMany();
+    const result = await query.limit(3).getRawMany();
 
     return result.map((r) => {
       const createdDate = r.createdAt
@@ -500,7 +519,10 @@ export class DashboardAiService {
       .select('log.action', 'action')
       .addSelect('COUNT(*)', 'count')
       .where('log.createdAt >= :thirtyDaysAgo', { thirtyDaysAgo })
-      .andWhere(userId ? 'log.userId = :userId' : '1=1', userId ? { userId } : {})
+      .andWhere(
+        userId ? 'log.userId = :userId' : '1=1',
+        userId ? { userId } : {},
+      )
       .groupBy('log.action')
       .getRawMany();
 
@@ -509,7 +531,10 @@ export class DashboardAiService {
       .select('log.entity', 'entity')
       .addSelect('COUNT(*)', 'count')
       .where('log.createdAt >= :thirtyDaysAgo', { thirtyDaysAgo })
-      .andWhere(userId ? 'log.userId = :userId' : '1=1', userId ? { userId } : {})
+      .andWhere(
+        userId ? 'log.userId = :userId' : '1=1',
+        userId ? { userId } : {},
+      )
       .groupBy('log.entity')
       .orderBy('COUNT(*)', 'DESC')
       .limit(3)
@@ -530,10 +555,9 @@ export class DashboardAiService {
       .map((r) => `"${r.entity}" (${r.count})`)
       .join(', ');
 
-    const deleteCount =
-      Number(
-        actionBreakdown.find((r) => r.action === 'DELETE')?.count || 0,
-      );
+    const deleteCount = Number(
+      actionBreakdown.find((r) => r.action === 'DELETE')?.count || 0,
+    );
 
     if (deleteCount > 0) {
       insights.push({
@@ -549,17 +573,13 @@ export class DashboardAiService {
           `${deleteCount} DELETE(s) out of ${totalActions} total actions`,
           `Actions breakdown: ${actionSummary}`,
         ],
-        whatsNeeded: [
-          `Most active entities: ${entitySummary}`,
-        ],
+        whatsNeeded: [`Most active entities: ${entitySummary}`],
         requiredActions: [
           deleteCount > 5
             ? `Review the ${deleteCount} deletions for unauthorized activity`
             : `Verify the ${deleteCount} deletion(s) were authorized`,
         ],
-        recommendations: [
-          `Review audit log for unexpected DELETE patterns`,
-        ],
+        recommendations: [`Review audit log for unexpected DELETE patterns`],
         impact: `${deleteCount} records deleted in the past 30 days`,
         estimatedEffort: 'medium',
         priority: deleteCount > 5 ? 8 : 6,
@@ -582,9 +602,7 @@ export class DashboardAiService {
           `Total actions: ${totalActions}`,
           `Actions: ${actionSummary}`,
         ],
-        whatsNeeded: [
-          `Most active entities: ${entitySummary}`,
-        ],
+        whatsNeeded: [`Most active entities: ${entitySummary}`],
         requiredActions: [],
         recommendations: [
           `No unusual activity detected — audit trail is healthy`,

@@ -109,7 +109,9 @@ describe('DashboardController', () => {
       );
       const req = { user: { id: 1 } } as any;
 
-      await expect(controller.getInsightsAsync(req)).rejects.toThrow('AI error');
+      await expect(controller.getInsightsAsync(req)).rejects.toThrow(
+        'AI error',
+      );
     });
   });
 });

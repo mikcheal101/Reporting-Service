@@ -52,17 +52,28 @@ export class TasksService {
     scheduleTaskRequestDto: ScheduleTaskRequestDto,
   ): Promise<void> => {
     try {
-      // check if task exists
       const report = await this.getReportAsync(scheduleTaskRequestDto);
 
-      const exists = await this.taskRepository.findOneBy({
+      const existingTask = await this.taskRepository.findOneBy({
         report: { id: report.id },
       });
 
-      if (exists) {
-        const errorMessage: string = ERRORS.REPORT_ALREADY_SCHEDULED(exists.id);
-        this.logger.warn(errorMessage);
-        throw new ConflictException(errorMessage);
+      if (existingTask) {
+        if (!scheduleTaskRequestDto.generateNow) return;
+
+        const dateTime: Date = new Date(
+          `${report.reportType?.runDate}T${report.reportType?.runTime}`,
+        );
+
+        existingTask.cronExpression = this.cronUtil.dateToCron(
+          dateTime,
+          report.reportType.frequency,
+        );
+        existingTask.status = TaskStatus.SCHEDULED;
+
+        await this.taskRepository.save(existingTask);
+        this.logger.log(`rescheduled task ${existingTask.id} for report ${report.id}.`);
+        return;
       }
 
       if (scheduleTaskRequestDto.generateNow) {
@@ -84,6 +95,25 @@ export class TasksService {
         where: {
           active: true,
           status: TaskStatus.QUEUED,
+        },
+        relations: {
+          report: {
+            reportType: true,
+          },
+        },
+      });
+    } catch (error) {
+      this.logger.error(error.message, error);
+      throw error;
+    }
+  };
+
+  public fetchScheduledTasksAsync = async (): Promise<Task[]> => {
+    try {
+      return await this.taskRepository.find({
+        where: {
+          active: true,
+          status: TaskStatus.SCHEDULED,
         },
         relations: {
           report: {

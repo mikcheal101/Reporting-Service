@@ -63,32 +63,50 @@ export class MetricsService implements OnModuleDestroy {
     return this.register;
   }
 
-  public incrementHttpRequests(method: string, route: string, status: number): void {
-    const gauge = this.register.getSingleMetric('http_requests_total') as promClient.Gauge<string>;
+  public incrementHttpRequests(
+    method: string,
+    route: string,
+    status: number,
+  ): void {
+    const gauge = this.register.getSingleMetric(
+      'http_requests_total',
+    ) as promClient.Gauge<string>;
     if (gauge) {
       gauge.inc({ method, route, status: String(status) });
     }
   }
 
-  public observeHttpRequestDuration(method: string, route: string, seconds: number): void {
-    const histogram = this.register.getSingleMetric('http_request_duration_seconds') as promClient.Histogram<string>;
+  public observeHttpRequestDuration(
+    method: string,
+    route: string,
+    seconds: number,
+  ): void {
+    const histogram = this.register.getSingleMetric(
+      'http_request_duration_seconds',
+    ) as promClient.Histogram<string>;
     if (histogram) {
       histogram.observe({ method, route }, seconds);
     }
   }
 
   public setDbPoolSize(size: number): void {
-    const gauge = this.register.getSingleMetric('db_connection_pool_size') as promClient.Gauge<string>;
+    const gauge = this.register.getSingleMetric(
+      'db_connection_pool_size',
+    ) as promClient.Gauge<string>;
     if (gauge) gauge.set(size);
   }
 
   public setDbPoolActive(active: number): void {
-    const gauge = this.register.getSingleMetric('db_connection_pool_active') as promClient.Gauge<string>;
+    const gauge = this.register.getSingleMetric(
+      'db_connection_pool_active',
+    ) as promClient.Gauge<string>;
     if (gauge) gauge.set(active);
   }
 
   public setDbPoolIdle(idle: number): void {
-    const gauge = this.register.getSingleMetric('db_connection_pool_idle') as promClient.Gauge<string>;
+    const gauge = this.register.getSingleMetric(
+      'db_connection_pool_idle',
+    ) as promClient.Gauge<string>;
     if (gauge) gauge.set(idle);
   }
 

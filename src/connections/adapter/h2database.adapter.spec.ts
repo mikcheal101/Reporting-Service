@@ -43,7 +43,9 @@ describe('H2DatabaseAdapter', () => {
       mockPool.connect.mockRejectedValue(new Error('Connection refused'));
 
       const adapter = new H2DatabaseAdapter(connectionDto);
-      await expect(adapter.connectAsync()).rejects.toThrow('Connection refused');
+      await expect(adapter.connectAsync()).rejects.toThrow(
+        'Connection refused',
+      );
     });
   });
 
@@ -92,7 +94,9 @@ describe('H2DatabaseAdapter', () => {
       const adapter = new H2DatabaseAdapter(connectionDto);
       (adapter as any).client = mockClient;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Query failed');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Query failed',
+      );
     });
 
     it('should throw DatabaseTimeOutError on ETIMEDOUT', async () => {
@@ -103,7 +107,9 @@ describe('H2DatabaseAdapter', () => {
       const adapter = new H2DatabaseAdapter(connectionDto);
       (adapter as any).client = mockClient;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database query timed out');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database query timed out',
+      );
     });
 
     it('should throw DatabaseTimeOutError on code 57014', async () => {
@@ -114,7 +120,9 @@ describe('H2DatabaseAdapter', () => {
       const adapter = new H2DatabaseAdapter(connectionDto);
       (adapter as any).client = mockClient;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database query timed out');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database query timed out',
+      );
     });
 
     it('should throw DatabaseDeadLockError on code 40001', async () => {
@@ -125,7 +133,9 @@ describe('H2DatabaseAdapter', () => {
       const adapter = new H2DatabaseAdapter(connectionDto);
       (adapter as any).client = mockClient;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
   });
 

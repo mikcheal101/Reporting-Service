@@ -30,7 +30,10 @@ describe('ReportTypesController', () => {
           useValue: mockReportTypesService,
         },
       ],
-    }).overrideGuard(AuthGuard).useValue({ canActivate: jest.fn(() => true) }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ReportTypesController>(ReportTypesController);
     reportTypesService = module.get<ReportTypesService>(ReportTypesService);

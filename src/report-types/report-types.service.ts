@@ -154,6 +154,26 @@ export class ReportTypesService {
 
   public deleteAsync = async (id: number): Promise<boolean> => {
     try {
+      const reportType = await this.reportTypeRepository.findOne({
+        where: { id },
+        relations: { reports: { task: true } },
+      });
+
+      if (!reportType) return false;
+
+      for (const report of reportType.reports || []) {
+        if (report.task) {
+          await this.taskRepository.delete(report.task.id);
+        }
+      }
+
+      const reportIds = (reportType.reports || []).map((r) => r.id);
+      if (reportIds.length > 0) {
+        await this.reportTypeRepository.manager
+          .getRepository('Report')
+          .delete(reportIds);
+      }
+
       const removed = await this.reportTypeRepository.delete({ id });
       return removed.affected > 0;
     } catch (error) {

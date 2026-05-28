@@ -37,7 +37,9 @@ describe('IbmDb2Adapter', () => {
       ibmdb.open.mockRejectedValue(new Error('Connection refused'));
 
       const adapter = new IbmDb2Adapter(connectionDto);
-      await expect(adapter.connectAsync()).rejects.toThrow('Connection refused');
+      await expect(adapter.connectAsync()).rejects.toThrow(
+        'Connection refused',
+      );
     });
   });
 
@@ -73,9 +75,10 @@ describe('IbmDb2Adapter', () => {
         date: { type: DatabaseDatatype.DATE, value: new Date('2024-01-01') },
       };
       await adapter.queryAsync('SELECT * FROM users WHERE name = ?', params);
-      expect(mockConn.query).toHaveBeenCalledWith('SELECT * FROM users WHERE name = ?', [
-        'test', 10, true, new Date('2024-01-01'),
-      ]);
+      expect(mockConn.query).toHaveBeenCalledWith(
+        'SELECT * FROM users WHERE name = ?',
+        ['test', 10, true, new Date('2024-01-01')],
+      );
     });
 
     it('should re-throw query errors', async () => {
@@ -84,7 +87,9 @@ describe('IbmDb2Adapter', () => {
       const adapter = new IbmDb2Adapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Query failed');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Query failed',
+      );
     });
 
     it('should throw DatabaseTimeOutError on ETIMEDOUT', async () => {
@@ -95,7 +100,9 @@ describe('IbmDb2Adapter', () => {
       const adapter = new IbmDb2Adapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database query timed out');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database query timed out',
+      );
     });
 
     it('should throw DatabaseDeadLockError on error 911', async () => {
@@ -106,7 +113,9 @@ describe('IbmDb2Adapter', () => {
       const adapter = new IbmDb2Adapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
 
     it('should throw DatabaseDeadLockError on sqlcode -911', async () => {
@@ -117,7 +126,9 @@ describe('IbmDb2Adapter', () => {
       const adapter = new IbmDb2Adapter(connectionDto);
       (adapter as any).connection = mockConn;
 
-      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow('Database Lock Detected!');
+      await expect(adapter.queryAsync('SELECT * FROM users')).rejects.toThrow(
+        'Database Lock Detected!',
+      );
     });
   });
 

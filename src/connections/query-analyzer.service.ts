@@ -57,23 +57,35 @@ export class QueryAnalyzerService {
     const suggestions: string[] = [];
     const planStr = JSON.stringify(planResult || '').toLowerCase();
 
-    if (planStr.includes('seq scan') || planStr.includes('table scan') || planStr.includes('full scan')) {
-      const scanMatch = planStr.match(/(\w+)\s*(?:seq scan|table scan|full scan)/i);
+    if (
+      planStr.includes('seq scan') ||
+      planStr.includes('table scan') ||
+      planStr.includes('full scan')
+    ) {
+      const scanMatch = planStr.match(
+        /(\w+)\s*(?:seq scan|table scan|full scan)/i,
+      );
       tableScans.push(scanMatch?.[1] || 'unknown table');
       suggestions.push('Add indexes to avoid sequential scans');
       missingIndexes.push('Missing index on table(s) with sequential scans');
     }
 
     if (planStr.includes('sort') && !planStr.includes('index')) {
-      suggestions.push('Consider adding an index on ORDER BY columns to avoid sort operations');
+      suggestions.push(
+        'Consider adding an index on ORDER BY columns to avoid sort operations',
+      );
     }
 
     if (planStr.includes('temp') || planStr.includes('temporary')) {
-      suggestions.push('Query uses temporary tables — consider optimizing joins or adding indexes');
+      suggestions.push(
+        'Query uses temporary tables — consider optimizing joins or adding indexes',
+      );
     }
 
     if (planStr.includes('nested loop') && !planStr.includes('index')) {
-      suggestions.push('Nested loop join without index — add index on join columns');
+      suggestions.push(
+        'Nested loop join without index — add index on join columns',
+      );
     }
 
     const costMatch = planStr.match(/"total_cost"\s*:\s*([\d.]+)/);
@@ -93,7 +105,8 @@ export class QueryAnalyzerService {
       query,
       databaseType: dbType,
       plan: planResult,
-      estimatedRows: rowMatch2 || (rowMatch ? parseInt(rowMatch[1]) : undefined),
+      estimatedRows:
+        rowMatch2 || (rowMatch ? parseInt(rowMatch[1]) : undefined),
       estimatedCost: costMatch ? parseFloat(costMatch[1]) : undefined,
       tableScans,
       missingIndexes,
@@ -101,7 +114,9 @@ export class QueryAnalyzerService {
     };
   }
 
-  generateIndexingRecommendations(analysis: QueryPlanResult): IndexingRecommendation[] {
+  generateIndexingRecommendations(
+    analysis: QueryPlanResult,
+  ): IndexingRecommendation[] {
     const recommendations: IndexingRecommendation[] = [];
 
     for (const table of analysis.tableScans) {

@@ -1,6 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { circuitBreaker, CircuitBreakerPolicy, handleAll, wrap, SamplingBreaker } from 'cockatiel';
-import { retry as retryPolicy, handleType, TimeoutStrategy, timeout as timeoutPolicy } from 'cockatiel';
+import {
+  circuitBreaker,
+  CircuitBreakerPolicy,
+  handleAll,
+  wrap,
+  SamplingBreaker,
+} from 'cockatiel';
+import {
+  retry as retryPolicy,
+  handleType,
+  TimeoutStrategy,
+  timeout as timeoutPolicy,
+} from 'cockatiel';
 
 export interface CircuitBreakerOptions {
   halfOpenAfter: number;
@@ -23,19 +34,33 @@ export class CircuitBreakerService {
     samplingWindowMs: 60000,
   };
 
-  public getBreaker(key: string, options?: Partial<CircuitBreakerOptions>): CircuitBreakerPolicy {
+  public getBreaker(
+    key: string,
+    options?: Partial<CircuitBreakerOptions>,
+  ): CircuitBreakerPolicy {
     const existing = this.breakers.get(key);
     if (existing) return existing;
 
     const opts = { ...this.defaultOptions, ...options };
     const breaker = circuitBreaker(handleAll, {
-      breaker: new SamplingBreaker({ threshold: 1 / opts.failureThreshold, duration: opts.samplingWindowMs }),
+      breaker: new SamplingBreaker({
+        threshold: 1 / opts.failureThreshold,
+        duration: opts.samplingWindowMs,
+      }),
       halfOpenAfter: opts.halfOpenAfter,
     });
 
-    breaker.onBreak(() => this.logger.warn(`Circuit breaker [${key}] OPEN — requests will be rejected`));
-    breaker.onHalfOpen(() => this.logger.log(`Circuit breaker [${key}] HALF-OPEN — testing recovery`));
-    breaker.onReset(() => this.logger.log(`Circuit breaker [${key}] CLOSED —恢复正常`));
+    breaker.onBreak(() =>
+      this.logger.warn(
+        `Circuit breaker [${key}] OPEN — requests will be rejected`,
+      ),
+    );
+    breaker.onHalfOpen(() =>
+      this.logger.log(`Circuit breaker [${key}] HALF-OPEN — testing recovery`),
+    );
+    breaker.onReset(() =>
+      this.logger.log(`Circuit breaker [${key}] CLOSED —恢复正常`),
+    );
 
     this.breakers.set(key, breaker);
     return breaker;
@@ -44,7 +69,10 @@ export class CircuitBreakerService {
   public async execute<T>(key: string, fn: () => Promise<T>): Promise<T> {
     const breaker = this.getBreaker(key);
     const retry = retryPolicy(handleType(Error), { maxAttempts: 1 });
-    const timeout = timeoutPolicy(this.defaultOptions.timeoutMs, TimeoutStrategy.Aggressive);
+    const timeout = timeoutPolicy(
+      this.defaultOptions.timeoutMs,
+      TimeoutStrategy.Aggressive,
+    );
 
     const combined = wrap(timeout, breaker, retry);
     return combined.execute(() => fn());
@@ -55,11 +83,16 @@ export class CircuitBreakerService {
     if (!breaker) return 'Closed';
 
     switch (breaker.state) {
-      case 0: return 'Closed';
-      case 1: return 'Open';
-      case 2: return 'HalfOpen';
-      case 3: return 'Isolated';
-      default: return 'Unknown';
+      case 0:
+        return 'Closed';
+      case 1:
+        return 'Open';
+      case 2:
+        return 'HalfOpen';
+      case 3:
+        return 'Isolated';
+      default:
+        return 'Unknown';
     }
   }
 

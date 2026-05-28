@@ -10,7 +10,12 @@ import { ConnectionPoolService } from './connection-pool.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Connection]), CryptoModule],
-  providers: [ConnectionsService, ConnectionUtils, QueryAnalyzerService, ConnectionPoolService],
+  providers: [
+    ConnectionsService,
+    ConnectionUtils,
+    QueryAnalyzerService,
+    ConnectionPoolService,
+  ],
   controllers: [ConnectionsController],
   exports: [ConnectionsService, ConnectionPoolService],
 })

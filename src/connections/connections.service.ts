@@ -290,7 +290,10 @@ export class ConnectionsService {
     if (!connection) throw new NotFoundException(ERRORS.CONNECTION_NOT_FOUND);
 
     const dbType = connection.databaseType;
-    const explainQuery = this.queryAnalyzerService.generateExplainQuery(query, dbType);
+    const explainQuery = this.queryAnalyzerService.generateExplainQuery(
+      query,
+      dbType,
+    );
 
     const adapter = DatabaseFactory.create({
       name: connection.name,
@@ -304,8 +307,16 @@ export class ConnectionsService {
 
     try {
       await adapter.connectAsync();
-      const explainResult = await adapter.queryAsync(explainQuery, undefined, connection.queryTimeout || 60000);
-      return this.queryAnalyzerService.analyzePlan(query, dbType, explainResult);
+      const explainResult = await adapter.queryAsync(
+        explainQuery,
+        undefined,
+        connection.queryTimeout || 60000,
+      );
+      return this.queryAnalyzerService.analyzePlan(
+        query,
+        dbType,
+        explainResult,
+      );
     } catch (error) {
       this.logger.error(`Query plan analysis failed: ${error.message}`);
       return this.queryAnalyzerService.analyzePlan(query, dbType, null);

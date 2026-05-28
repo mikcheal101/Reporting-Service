@@ -1,4 +1,11 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 
@@ -13,7 +20,10 @@ export class SentryFilter implements ExceptionFilter {
       try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const Sentry = require('@sentry/node');
-        Sentry.init({ dsn: this.dsn, environment: process.env.NODE_ENV || 'development' });
+        Sentry.init({
+          dsn: this.dsn,
+          environment: process.env.NODE_ENV || 'development',
+        });
         this.logger.log('Sentry error tracking initialized');
       } catch {
         this.logger.warn('Failed to initialize Sentry');
@@ -26,7 +36,10 @@ export class SentryFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
     if (status >= 500 && this.dsn) {
       try {
@@ -45,14 +58,25 @@ export class SentryFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
-      this.logger.error(`Unhandled exception: ${exception instanceof Error ? exception.message : 'Unknown error'}`, exception instanceof Error ? exception.stack : '');
+      this.logger.error(
+        `Unhandled exception: ${exception instanceof Error ? exception.message : 'Unknown error'}`,
+        exception instanceof Error ? exception.stack : '',
+      );
     }
 
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception instanceof HttpException ? exception.getResponse() : 'Internal server error',
+      message:
+        exception instanceof HttpException
+          ? (() => {
+              const response = exception.getResponse();
+              return typeof response === 'string'
+                ? response
+                : (response as Record<string, unknown>).message || exception.message;
+            })()
+          : 'Internal server error',
     });
   }
 }

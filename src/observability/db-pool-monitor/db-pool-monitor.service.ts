@@ -23,12 +23,24 @@ export class DbPoolMonitorService implements OnModuleInit {
     try {
       if (!this.dataSource.isInitialized) return;
 
-      const pool = (this.dataSource.driver as unknown as Record<string, unknown>).pool;
+      const pool = (
+        this.dataSource.driver as unknown as Record<string, unknown>
+      ).pool;
       if (!pool) return;
 
       const poolAny = pool as Record<string, unknown>;
-      const size = typeof poolAny.size === 'number' ? poolAny.size : typeof poolAny.totalCount === 'number' ? poolAny.totalCount : 0;
-      const available = typeof poolAny.available === 'number' ? poolAny.available : typeof poolAny.idleCount === 'number' ? poolAny.idleCount : 0;
+      const size =
+        typeof poolAny.size === 'number'
+          ? poolAny.size
+          : typeof poolAny.totalCount === 'number'
+            ? poolAny.totalCount
+            : 0;
+      const available =
+        typeof poolAny.available === 'number'
+          ? poolAny.available
+          : typeof poolAny.idleCount === 'number'
+            ? poolAny.idleCount
+            : 0;
       const active = size - available;
 
       this.metricsService.setDbPoolSize(size);
@@ -40,12 +52,23 @@ export class DbPoolMonitorService implements OnModuleInit {
   }
 
   public async getPoolStatus(): Promise<Record<string, number>> {
-    const pool = (this.dataSource.driver as unknown as Record<string, unknown>).pool;
+    const pool = (this.dataSource.driver as unknown as Record<string, unknown>)
+      .pool;
     if (!pool) return { size: 0, active: 0, idle: 0 };
 
     const poolAny = pool as Record<string, unknown>;
-    const size = typeof poolAny.size === 'number' ? poolAny.size : typeof poolAny.totalCount === 'number' ? poolAny.totalCount : 0;
-    const available = typeof poolAny.available === 'number' ? poolAny.available : typeof poolAny.idleCount === 'number' ? poolAny.idleCount : 0;
+    const size =
+      typeof poolAny.size === 'number'
+        ? poolAny.size
+        : typeof poolAny.totalCount === 'number'
+          ? poolAny.totalCount
+          : 0;
+    const available =
+      typeof poolAny.available === 'number'
+        ? poolAny.available
+        : typeof poolAny.idleCount === 'number'
+          ? poolAny.idleCount
+          : 0;
     return { size, active: size - available, idle: available };
   }
 
